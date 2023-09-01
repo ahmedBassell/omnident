@@ -31,48 +31,49 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Padding(
-          padding: EdgeInsets.symmetric(vertical: 32.0, horizontal: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 16),
+      body: Padding(
+        padding: EdgeInsets.symmetric(vertical: 32.0, horizontal: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: 16),
+            Text(
+              'Upcoming Appointments',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 16),
+            // Display a list of upcoming appointments with details
+            if (upcomingAppointments.isEmpty)
               Text(
-                'Upcoming Appointments',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 16),
-              // Display a list of upcoming appointments with details
-              if (upcomingAppointments.isEmpty)
-                Text(
-                  'No recent patients.',
-                  style: TextStyle(fontSize: 16, color: Colors.grey),
-                )
-              else
-                for (var appointment in upcomingAppointments)
-                  _buildAppointmentCard(appointment),
-              SizedBox(height: 32),
+                'No recent patients.',
+                style: TextStyle(fontSize: 16, color: Colors.grey),
+              )
+            else
+              for (var appointment in upcomingAppointments)
+                _buildAppointmentCard(appointment),
+            SizedBox(height: 32),
+            Text(
+              'Most Recent Patients',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 16),
+            if (recentPatients.isEmpty)
               Text(
-                'Most Recent Patients',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 16),
-              if (recentPatients.isEmpty)
-                Text(
-                  'No recent patients.',
-                  style: TextStyle(fontSize: 16, color: Colors.grey),
-                )
-              else
-                _buildRecentPatientsSection(),
-            ],
-          ),
+                'No recent patients.',
+                style: TextStyle(fontSize: 16, color: Colors.grey),
+              )
+            else
+              _buildRecentPatientsSection(),
+          ],
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            _showAddOptions(context);
-          },
-          child: Icon(Icons.add),
-        ));
+      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () {
+      //     _showAddOptions(context);
+      //   },
+      //   child: Icon(Icons.add),
+      // )
+    );
   }
 
   void _showAddOptions(BuildContext context) {
