@@ -30,6 +30,10 @@ environment:
 dependencies:
   get_it: ^7.2.0
   date_time_picker: ^2.1.0
+  drift: ^2.11.1 # Drift dependency
+  sqlite3_flutter_libs: ^0.5.0 # Drift dependency
+  path_provider: ^2.0.0 # Drift dependency
+  path: ^1.8.3 # Drift dependency
   flutter:
     sdk: flutter
 
@@ -40,6 +44,8 @@ dependencies:
 
 dev_dependencies:
   flutter_launcher_icons: "^0.12.0"
+  drift_dev: ^2.11.1  # Drift dependency
+  build_runner: ^2.4.6  # Drift dependency
   flutter_test:
     sdk: flutter
 
