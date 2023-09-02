@@ -7,6 +7,7 @@ import 'package:omni_dent/core/services/patients_service.dart';
 import 'package:omni_dent/core/widgets/appointment_creation_form.dart';
 import 'package:omni_dent/core/widgets/patient_card.dart';
 import 'package:omni_dent/core/widgets/patient_creation_form.dart';
+import 'package:omni_dent/database/database.dart';
 
 class DashboardScreen extends StatefulWidget {
   @override
@@ -23,8 +24,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    setState(() {
-      recentPatients = _patientsService.getPatients();
+    List<Patient> patients = [];
+    _patientsService.getPatients().then((patients) {
+      setState(() {
+        recentPatients = patients;
+      });
     });
   }
 
@@ -123,9 +127,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
       },
     ).whenComplete(() => {
           // Navigator.pop(context);
-          setState(() {
-            recentPatients = _patientsService.getPatients();
-            upcomingAppointments = _appointmentsService.getAppointments();
+          setState(() async {
+            recentPatients = await _patientsService.getPatients();
+            upcomingAppointments = await _appointmentsService.getAppointments();
           })
         });
   }
@@ -149,16 +153,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
       elevation: 2,
       margin: EdgeInsets.only(bottom: 16),
       child: ListTile(
-        title: Text(appointment.patient.name),
+        title: Text("appointment.patient.name"),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(appointment.name),
+            Text(appointment.title),
             Text(
-              'Date: ${appointment.dateTime.day}/${appointment.dateTime.month}/${appointment.dateTime.year}',
+              'Date: ${appointment.dateTimeFrom.day}/${appointment.dateTimeFrom.month}/${appointment.dateTimeFrom.year}',
             ),
             Text(
-              'Time: ${appointment.dateTime.hour}:${appointment.dateTime.minute}',
+              'Time: ${appointment.dateTimeFrom.hour}:${appointment.dateTimeFrom.minute}',
             ),
           ],
         ),

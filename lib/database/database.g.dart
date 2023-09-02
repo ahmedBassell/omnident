@@ -1303,9 +1303,9 @@ class $AppointmentsTable extends Appointments
       const VerificationMeta('location');
   @override
   late final GeneratedColumn<int> location = GeneratedColumn<int>(
-      'location', aliasedName, false,
+      'location', aliasedName, true,
       type: DriftSqlType.int,
-      requiredDuringInsert: true,
+      requiredDuringInsert: false,
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('REFERENCES locations (id)'));
   static const VerificationMeta _titleMeta = const VerificationMeta('title');
@@ -1357,8 +1357,6 @@ class $AppointmentsTable extends Appointments
     if (data.containsKey('location')) {
       context.handle(_locationMeta,
           location.isAcceptableOrUnknown(data['location']!, _locationMeta));
-    } else if (isInserting) {
-      context.missing(_locationMeta);
     }
     if (data.containsKey('title')) {
       context.handle(
@@ -1390,7 +1388,7 @@ class $AppointmentsTable extends Appointments
       patient: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}patient'])!,
       location: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}location'])!,
+          .read(DriftSqlType.int, data['${effectivePrefix}location']),
       title: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
       dateTimeFrom: attachedDatabase.typeMapping.read(
@@ -1409,7 +1407,7 @@ class Appointment extends DataClass implements Insertable<Appointment> {
   final DateTime createdAt;
   final DateTime updatedAt;
   final int patient;
-  final int location;
+  final int? location;
   final String title;
   final DateTime dateTimeFrom;
   const Appointment(
@@ -1417,7 +1415,7 @@ class Appointment extends DataClass implements Insertable<Appointment> {
       required this.createdAt,
       required this.updatedAt,
       required this.patient,
-      required this.location,
+      this.location,
       required this.title,
       required this.dateTimeFrom});
   @override
@@ -1427,7 +1425,9 @@ class Appointment extends DataClass implements Insertable<Appointment> {
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     map['patient'] = Variable<int>(patient);
-    map['location'] = Variable<int>(location);
+    if (!nullToAbsent || location != null) {
+      map['location'] = Variable<int>(location);
+    }
     map['title'] = Variable<String>(title);
     map['date_time_from'] = Variable<DateTime>(dateTimeFrom);
     return map;
@@ -1439,7 +1439,9 @@ class Appointment extends DataClass implements Insertable<Appointment> {
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
       patient: Value(patient),
-      location: Value(location),
+      location: location == null && nullToAbsent
+          ? const Value.absent()
+          : Value(location),
       title: Value(title),
       dateTimeFrom: Value(dateTimeFrom),
     );
@@ -1453,7 +1455,7 @@ class Appointment extends DataClass implements Insertable<Appointment> {
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       patient: serializer.fromJson<int>(json['patient']),
-      location: serializer.fromJson<int>(json['location']),
+      location: serializer.fromJson<int?>(json['location']),
       title: serializer.fromJson<String>(json['title']),
       dateTimeFrom: serializer.fromJson<DateTime>(json['dateTimeFrom']),
     );
@@ -1466,7 +1468,7 @@ class Appointment extends DataClass implements Insertable<Appointment> {
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'patient': serializer.toJson<int>(patient),
-      'location': serializer.toJson<int>(location),
+      'location': serializer.toJson<int?>(location),
       'title': serializer.toJson<String>(title),
       'dateTimeFrom': serializer.toJson<DateTime>(dateTimeFrom),
     };
@@ -1477,7 +1479,7 @@ class Appointment extends DataClass implements Insertable<Appointment> {
           DateTime? createdAt,
           DateTime? updatedAt,
           int? patient,
-          int? location,
+          Value<int?> location = const Value.absent(),
           String? title,
           DateTime? dateTimeFrom}) =>
       Appointment(
@@ -1485,7 +1487,7 @@ class Appointment extends DataClass implements Insertable<Appointment> {
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
         patient: patient ?? this.patient,
-        location: location ?? this.location,
+        location: location.present ? location.value : this.location,
         title: title ?? this.title,
         dateTimeFrom: dateTimeFrom ?? this.dateTimeFrom,
       );
@@ -1524,7 +1526,7 @@ class AppointmentsCompanion extends UpdateCompanion<Appointment> {
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<int> patient;
-  final Value<int> location;
+  final Value<int?> location;
   final Value<String> title;
   final Value<DateTime> dateTimeFrom;
   const AppointmentsCompanion({
@@ -1541,11 +1543,10 @@ class AppointmentsCompanion extends UpdateCompanion<Appointment> {
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     required int patient,
-    required int location,
+    this.location = const Value.absent(),
     required String title,
     this.dateTimeFrom = const Value.absent(),
   })  : patient = Value(patient),
-        location = Value(location),
         title = Value(title);
   static Insertable<Appointment> custom({
     Expression<int>? id,
@@ -1572,7 +1573,7 @@ class AppointmentsCompanion extends UpdateCompanion<Appointment> {
       Value<DateTime>? createdAt,
       Value<DateTime>? updatedAt,
       Value<int>? patient,
-      Value<int>? location,
+      Value<int?>? location,
       Value<String>? title,
       Value<DateTime>? dateTimeFrom}) {
     return AppointmentsCompanion(

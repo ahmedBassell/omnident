@@ -1,7 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:omni_dent/core/models/gender.dart';
 import 'package:omni_dent/core/models/tooth_state.dart';
-part 'tables.g.dart';
 
 mixin AutoIncrementingPrimaryKey on Table {
   IntColumn get id => integer().autoIncrement()();
@@ -45,7 +44,7 @@ class Instruments extends Table with AutoIncrementingPrimaryKey, TimeStamps {
 
 class Appointments extends Table with AutoIncrementingPrimaryKey, TimeStamps {
   IntColumn get patient => integer().references(Patients, #id)();
-  IntColumn get location => integer().references(Locations, #id)();
+  IntColumn get location => integer().references(Locations, #id).nullable()();
   TextColumn get title => text().withLength(min: 2, max: 32)();
   DateTimeColumn get dateTimeFrom => dateTime()
       .check(dateTimeFrom.isBiggerThan(currentDateAndTime))

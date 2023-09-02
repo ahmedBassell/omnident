@@ -4,6 +4,7 @@ import 'package:get_it/get_it.dart';
 import 'package:omni_dent/core/models/patient.dart';
 import 'package:omni_dent/core/services/appointments_service.dart';
 import 'package:omni_dent/core/services/patients_service.dart';
+import 'package:omni_dent/database/database.dart';
 
 class AppointmentCreationForm extends StatefulWidget {
   @override
@@ -27,7 +28,9 @@ class _AppointmentCreationFormState extends State<AppointmentCreationForm> {
   @override
   void initState() {
     super.initState();
-    patients = _patientsService.getPatients();
+    _patientsService.getPatients().then((existingPatients) {
+      patients = existingPatients;
+    });
   }
 
   @override

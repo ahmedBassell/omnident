@@ -1,23 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:omni_dent/core/models/patient.dart';
+import 'package:get_it/get_it.dart';
+import 'package:omni_dent/core/services/patients_service.dart';
+import 'package:omni_dent/database/database.dart';
 
 class PatientsScreen extends StatefulWidget {
+  const PatientsScreen({super.key});
+
   @override
   _PatientsScreenState createState() => _PatientsScreenState();
 }
 
 class _PatientsScreenState extends State<PatientsScreen> {
-  List<Patient> patients = [
-    Patient(id: 1, name: "John Doe", phone: "123-456-7890"),
-    Patient(id: 2, name: "Jane Smith", phone: "987-654-3210"),
-    // Add more patients
-  ];
+  PatientsService get _patientsService => GetIt.I<PatientsService>();
+  List<Patient> patients = [];
 
   List<Patient> filteredPatients = [];
 
   @override
   void initState() {
     filteredPatients = patients;
+    _patientsService.getPatients(limit: 10, offset: 0).then((patientsRecords) {
+      setState(() {
+        patients = patientsRecords;
+        filteredPatients = patients;
+      });
+    });
     super.initState();
   }
 
@@ -25,8 +32,9 @@ class _PatientsScreenState extends State<PatientsScreen> {
     setState(() {
       filteredPatients = patients.where((patient) {
         final lowerCaseQuery = query.toLowerCase();
-        return patient.name.toLowerCase().contains(lowerCaseQuery) ||
-            patient.phone!.contains(query);
+        final String name = patient.name.toLowerCase();
+        final String phone = patient.phone ?? "";
+        return name.contains(lowerCaseQuery) || phone.contains(lowerCaseQuery);
       }).toList();
     });
   }
@@ -72,7 +80,7 @@ class PatientItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       title: Text(patient.name),
-      subtitle: Text(patient.phone!),
+      subtitle: Text(patient.phone ?? "+2***********"),
       trailing: PopupMenuButton<String>(
         itemBuilder: (context) => [
           PopupMenuItem<String>(
