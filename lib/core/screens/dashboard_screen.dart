@@ -8,6 +8,7 @@ import 'package:omni_dent/core/widgets/appointment_creation_form.dart';
 import 'package:omni_dent/core/widgets/patient_card.dart';
 import 'package:omni_dent/core/widgets/patient_creation_form.dart';
 import 'package:omni_dent/database/database.dart';
+import 'package:omni_dent/locations/widgets/location_creation_form.dart';
 
 class DashboardScreen extends StatefulWidget {
   @override
@@ -103,7 +104,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Navigator.pop(context);
                   });
                 },
-                title: Text('Create New Patient'),
+                title: Text('Add a patient'),
                 leading: Icon(Icons.person_add),
               ),
               SizedBox(height: 16),
@@ -121,6 +122,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 title: Text('Create New Appointment'),
                 leading: Icon(Icons.calendar_today),
               ),
+              // SizedBox(height: 16),
+              // ListTile(
+              //   onTap: () {
+              //     showModalBottomSheet(
+              //       context: context,
+              //       builder: (BuildContext context) {
+              //         return LocationCreationForm();
+              //       },
+              //     ).whenComplete(() {
+              //       Navigator.pop(context);
+              //     });
+              //   },
+              //   title: Text('Create New Location'),
+              //   leading: Icon(Icons.pin_drop),
+              // ),
             ],
           ),
         );

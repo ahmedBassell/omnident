@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:omni_dent/core/screens/dashboard_screen.dart';
 import 'package:omni_dent/core/widgets/appointment_creation_form.dart';
 import 'package:omni_dent/core/widgets/patient_creation_form.dart';
+import 'package:omni_dent/instruments/screens/instruments_screen.dart';
+import 'package:omni_dent/locations/widgets/location_creation_form.dart';
 import 'package:omni_dent/patients/screens/patients_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -16,7 +18,7 @@ class _HomeScreenState extends State<HomeScreen> {
     PatientsScreen(),
     Container(),
     Container(),
-    Container(),
+    InstrumentsScreen(),
   ];
 
   @override
@@ -102,6 +104,27 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
                 title: Text('Create New Appointment'),
                 leading: Icon(Icons.calendar_today),
+              ),
+              SizedBox(height: 16),
+              ListTile(
+                onTap: () {
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return SingleChildScrollView(
+                          padding: EdgeInsets.symmetric(
+                              vertical: 4.0, horizontal: 8.0),
+                          child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[LocationCreationForm()]));
+                    },
+                  ).whenComplete(() {
+                    Navigator.pop(context);
+                  });
+                },
+                title: Text('Create New Location'),
+                leading: Icon(Icons.pin_drop),
               ),
             ],
           ),

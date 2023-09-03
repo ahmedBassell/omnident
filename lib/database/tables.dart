@@ -37,9 +37,10 @@ class Locations extends Table
 class Instruments extends Table with AutoIncrementingPrimaryKey, TimeStamps {
   IntColumn get location => integer().references(Locations, #id)();
   TextColumn get name => text().withLength(min: 2, max: 32)();
-  TextColumn get lentToFriendName => text().withLength(min: 2, max: 32)();
+  TextColumn get lentToFriendName =>
+      text().withLength(min: 2, max: 32).nullable()();
   DateTimeColumn get receivedAt => dateTime().nullable()();
-  TextColumn get imagePath => text()();
+  TextColumn get imagePath => text().nullable()();
 }
 
 class Appointments extends Table with AutoIncrementingPrimaryKey, TimeStamps {

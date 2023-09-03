@@ -1,15 +1,19 @@
-import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:omni_dent/core/models/gender.dart';
 import 'package:omni_dent/core/services/appointments_service.dart';
 import 'package:omni_dent/core/services/patients_service.dart';
+import 'package:omni_dent/core/services/utils_service.dart';
 import 'package:omni_dent/core/widgets/splash_screen_wrapper.dart';
 import 'package:omni_dent/database/database.dart';
+import 'package:omni_dent/instruments/services/instruments_service.dart';
+import 'package:omni_dent/locations/services/locations_service.dart';
 
 void setupLocator() {
   GetIt.I.registerLazySingleton(() => PatientsService());
   GetIt.I.registerLazySingleton(() => AppointmentsService());
+  GetIt.I.registerLazySingleton(() => InstrumentsService());
+  GetIt.I.registerLazySingleton(() => LocationsService());
+  GetIt.I.registerLazySingleton(() => UtilsService());
   // DB
   final database = OmniDatabase();
   GetIt.I.registerLazySingleton(() => database);

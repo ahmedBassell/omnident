@@ -30,6 +30,7 @@ environment:
 dependencies:
   get_it: ^7.2.0
   date_time_picker: ^2.1.0
+  intl: ^0.17.0
   drift: ^2.11.1 # Drift dependency
   sqlite3_flutter_libs: ^0.5.0 # Drift dependency
   path_provider: ^2.0.0 # Drift dependency

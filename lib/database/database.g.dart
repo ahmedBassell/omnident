@@ -895,11 +895,11 @@ class $InstrumentsTable extends Instruments
       const VerificationMeta('lentToFriendName');
   @override
   late final GeneratedColumn<String> lentToFriendName = GeneratedColumn<String>(
-      'lent_to_friend_name', aliasedName, false,
+      'lent_to_friend_name', aliasedName, true,
       additionalChecks:
           GeneratedColumn.checkTextLength(minTextLength: 2, maxTextLength: 32),
       type: DriftSqlType.string,
-      requiredDuringInsert: true);
+      requiredDuringInsert: false);
   static const VerificationMeta _receivedAtMeta =
       const VerificationMeta('receivedAt');
   @override
@@ -910,8 +910,8 @@ class $InstrumentsTable extends Instruments
       const VerificationMeta('imagePath');
   @override
   late final GeneratedColumn<String> imagePath = GeneratedColumn<String>(
-      'image_path', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+      'image_path', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -960,8 +960,6 @@ class $InstrumentsTable extends Instruments
           _lentToFriendNameMeta,
           lentToFriendName.isAcceptableOrUnknown(
               data['lent_to_friend_name']!, _lentToFriendNameMeta));
-    } else if (isInserting) {
-      context.missing(_lentToFriendNameMeta);
     }
     if (data.containsKey('received_at')) {
       context.handle(
@@ -972,8 +970,6 @@ class $InstrumentsTable extends Instruments
     if (data.containsKey('image_path')) {
       context.handle(_imagePathMeta,
           imagePath.isAcceptableOrUnknown(data['image_path']!, _imagePathMeta));
-    } else if (isInserting) {
-      context.missing(_imagePathMeta);
     }
     return context;
   }
@@ -995,11 +991,11 @@ class $InstrumentsTable extends Instruments
       name: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
       lentToFriendName: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}lent_to_friend_name'])!,
+          DriftSqlType.string, data['${effectivePrefix}lent_to_friend_name']),
       receivedAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}received_at']),
       imagePath: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}image_path'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}image_path']),
     );
   }
 
@@ -1015,18 +1011,18 @@ class Instrument extends DataClass implements Insertable<Instrument> {
   final DateTime updatedAt;
   final int location;
   final String name;
-  final String lentToFriendName;
+  final String? lentToFriendName;
   final DateTime? receivedAt;
-  final String imagePath;
+  final String? imagePath;
   const Instrument(
       {required this.id,
       required this.createdAt,
       required this.updatedAt,
       required this.location,
       required this.name,
-      required this.lentToFriendName,
+      this.lentToFriendName,
       this.receivedAt,
-      required this.imagePath});
+      this.imagePath});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1035,11 +1031,15 @@ class Instrument extends DataClass implements Insertable<Instrument> {
     map['updated_at'] = Variable<DateTime>(updatedAt);
     map['location'] = Variable<int>(location);
     map['name'] = Variable<String>(name);
-    map['lent_to_friend_name'] = Variable<String>(lentToFriendName);
+    if (!nullToAbsent || lentToFriendName != null) {
+      map['lent_to_friend_name'] = Variable<String>(lentToFriendName);
+    }
     if (!nullToAbsent || receivedAt != null) {
       map['received_at'] = Variable<DateTime>(receivedAt);
     }
-    map['image_path'] = Variable<String>(imagePath);
+    if (!nullToAbsent || imagePath != null) {
+      map['image_path'] = Variable<String>(imagePath);
+    }
     return map;
   }
 
@@ -1050,11 +1050,15 @@ class Instrument extends DataClass implements Insertable<Instrument> {
       updatedAt: Value(updatedAt),
       location: Value(location),
       name: Value(name),
-      lentToFriendName: Value(lentToFriendName),
+      lentToFriendName: lentToFriendName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lentToFriendName),
       receivedAt: receivedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(receivedAt),
-      imagePath: Value(imagePath),
+      imagePath: imagePath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(imagePath),
     );
   }
 
@@ -1067,9 +1071,9 @@ class Instrument extends DataClass implements Insertable<Instrument> {
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       location: serializer.fromJson<int>(json['location']),
       name: serializer.fromJson<String>(json['name']),
-      lentToFriendName: serializer.fromJson<String>(json['lentToFriendName']),
+      lentToFriendName: serializer.fromJson<String?>(json['lentToFriendName']),
       receivedAt: serializer.fromJson<DateTime?>(json['receivedAt']),
-      imagePath: serializer.fromJson<String>(json['imagePath']),
+      imagePath: serializer.fromJson<String?>(json['imagePath']),
     );
   }
   @override
@@ -1081,9 +1085,9 @@ class Instrument extends DataClass implements Insertable<Instrument> {
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'location': serializer.toJson<int>(location),
       'name': serializer.toJson<String>(name),
-      'lentToFriendName': serializer.toJson<String>(lentToFriendName),
+      'lentToFriendName': serializer.toJson<String?>(lentToFriendName),
       'receivedAt': serializer.toJson<DateTime?>(receivedAt),
-      'imagePath': serializer.toJson<String>(imagePath),
+      'imagePath': serializer.toJson<String?>(imagePath),
     };
   }
 
@@ -1093,18 +1097,20 @@ class Instrument extends DataClass implements Insertable<Instrument> {
           DateTime? updatedAt,
           int? location,
           String? name,
-          String? lentToFriendName,
+          Value<String?> lentToFriendName = const Value.absent(),
           Value<DateTime?> receivedAt = const Value.absent(),
-          String? imagePath}) =>
+          Value<String?> imagePath = const Value.absent()}) =>
       Instrument(
         id: id ?? this.id,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
         location: location ?? this.location,
         name: name ?? this.name,
-        lentToFriendName: lentToFriendName ?? this.lentToFriendName,
+        lentToFriendName: lentToFriendName.present
+            ? lentToFriendName.value
+            : this.lentToFriendName,
         receivedAt: receivedAt.present ? receivedAt.value : this.receivedAt,
-        imagePath: imagePath ?? this.imagePath,
+        imagePath: imagePath.present ? imagePath.value : this.imagePath,
       );
   @override
   String toString() {
@@ -1144,9 +1150,9 @@ class InstrumentsCompanion extends UpdateCompanion<Instrument> {
   final Value<DateTime> updatedAt;
   final Value<int> location;
   final Value<String> name;
-  final Value<String> lentToFriendName;
+  final Value<String?> lentToFriendName;
   final Value<DateTime?> receivedAt;
-  final Value<String> imagePath;
+  final Value<String?> imagePath;
   const InstrumentsCompanion({
     this.id = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -1163,13 +1169,11 @@ class InstrumentsCompanion extends UpdateCompanion<Instrument> {
     this.updatedAt = const Value.absent(),
     required int location,
     required String name,
-    required String lentToFriendName,
+    this.lentToFriendName = const Value.absent(),
     this.receivedAt = const Value.absent(),
-    required String imagePath,
+    this.imagePath = const Value.absent(),
   })  : location = Value(location),
-        name = Value(name),
-        lentToFriendName = Value(lentToFriendName),
-        imagePath = Value(imagePath);
+        name = Value(name);
   static Insertable<Instrument> custom({
     Expression<int>? id,
     Expression<DateTime>? createdAt,
@@ -1198,9 +1202,9 @@ class InstrumentsCompanion extends UpdateCompanion<Instrument> {
       Value<DateTime>? updatedAt,
       Value<int>? location,
       Value<String>? name,
-      Value<String>? lentToFriendName,
+      Value<String?>? lentToFriendName,
       Value<DateTime?>? receivedAt,
-      Value<String>? imagePath}) {
+      Value<String?>? imagePath}) {
     return InstrumentsCompanion(
       id: id ?? this.id,
       createdAt: createdAt ?? this.createdAt,
