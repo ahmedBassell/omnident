@@ -13,13 +13,22 @@ class InstrumentsScreen extends StatefulWidget {
 class _InstrumentsScreenState extends State<InstrumentsScreen> {
   InstrumentsService get _instrumentsService => GetIt.I<InstrumentsService>();
   List<Instrument> instruments = [];
+  String _emptyStateCopy = "";
+  List<String> emptyStateSentences = [
+    "High-five! All instruments are settled up! 🙌",
+    "No lent or misplaced instruments in sight! 🥳",
+    "Your instrument inventory is shining bright ✨",
+    "Nice work! Your instrument inventory is on point 🪥"
+  ];
 
   @override
   void initState() {
     super.initState();
+    emptyStateSentences.shuffle();
     _instrumentsService.getAll().then((value) => {
           setState(() {
             instruments = value;
+            _emptyStateCopy = emptyStateSentences.first;
           })
         });
   }
@@ -33,21 +42,22 @@ class _InstrumentsScreenState extends State<InstrumentsScreen> {
           onPressed: () {
             _showAddInstrumentSheet(context);
           }),
-      body: ListView.builder(
-        itemCount: instruments.length,
-        itemBuilder: (context, index) {
-          return InstrumentItem(
-              instrument: instruments[index],
-              onInstrumentReceived: onInstrumentReceived);
-        },
-      ),
+      body: instruments.length == 0
+          ? Center(child: Text(_emptyStateCopy))
+          : ListView.builder(
+              itemCount: instruments.length,
+              itemBuilder: (context, index) {
+                return InstrumentItem(
+                    instrument: instruments[index],
+                    onInstrumentReceived: onInstrumentReceived);
+              },
+            ),
     );
   }
 
   void _showAddInstrumentSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      // isScrollControlled: true,
       builder: (context) {
         return SingleChildScrollView(
             child: Column(
