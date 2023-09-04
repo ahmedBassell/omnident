@@ -36,7 +36,9 @@ class _InstrumentsScreenState extends State<InstrumentsScreen> {
       body: ListView.builder(
         itemCount: instruments.length,
         itemBuilder: (context, index) {
-          return InstrumentItem(instrument: instruments[index]);
+          return InstrumentItem(
+              instrument: instruments[index],
+              onInstrumentReceived: onInstrumentReceived);
         },
       ),
     );
@@ -63,5 +65,13 @@ class _InstrumentsScreenState extends State<InstrumentsScreen> {
             ]));
       },
     );
+  }
+
+  void onInstrumentReceived() async {
+    _instrumentsService.getAll().then((value) => {
+          setState(() {
+            instruments = value;
+          })
+        });
   }
 }

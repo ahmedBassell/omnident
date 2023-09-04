@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:omni_dent/core/services/snack_bar_service.dart';
 import 'package:omni_dent/core/services/utils_service.dart';
 import 'package:omni_dent/database/database.dart';
+import 'package:omni_dent/instruments/services/instruments_service.dart';
 import 'package:omni_dent/locations/services/locations_service.dart';
 
 class InstrumentItem extends StatefulWidget {
   final Instrument instrument;
+  final Function() onInstrumentReceived;
 
-  InstrumentItem({required this.instrument});
+  InstrumentItem(
+      {required this.instrument, required this.onInstrumentReceived});
 
   @override
   _InstrumentItemState createState() => _InstrumentItemState();
@@ -16,6 +20,8 @@ class InstrumentItem extends StatefulWidget {
 class _InstrumentItemState extends State<InstrumentItem> {
   UtilsService get _utilsService => GetIt.I<UtilsService>();
   LocationsService get _locationsService => GetIt.I<LocationsService>();
+  InstrumentsService get _instrumentsService => GetIt.I<InstrumentsService>();
+  SnackBarService get _snackBarService => GetIt.I<SnackBarService>();
   late bool isReceived;
   Location? _location;
 
@@ -68,11 +74,15 @@ class _InstrumentItemState extends State<InstrumentItem> {
           ],
         ),
         trailing: ElevatedButton(
-            onPressed: () {
-              // Toggle the received status when the button is pressed
-              setState(() {
-                isReceived = !isReceived;
-              });
+            onPressed: () async {
+              await _instrumentsService.update(
+                  instrumentId: widget.instrument.id,
+                  locationId: widget.instrument.location,
+                  name: widget.instrument.name,
+                  receivedAt: DateTime.now());
+              _snackBarService.show(
+                  context, "Instrument has been marked as received!");
+              widget.onInstrumentReceived();
             },
             style: ElevatedButton.styleFrom(
               shape: RoundedRectangleBorder(

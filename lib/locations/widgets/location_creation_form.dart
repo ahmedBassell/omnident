@@ -48,8 +48,6 @@ class _LocationCreationFormState extends State<LocationCreationForm> {
       _formKey.currentState!.save();
       await _locationsService.create(name: _locationName);
       Navigator.pop(context);
-      // Call the callback with the entered location name
-      // widget.onLocationCreated(_locationName);
     }
   }
 }

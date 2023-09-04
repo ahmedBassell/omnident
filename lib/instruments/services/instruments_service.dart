@@ -28,8 +28,10 @@ class InstrumentsService {
   }
 
   Future<List<Instrument>> getAll({int limit = 50, int offset = 0}) async {
-    List<Instrument> instruments =
-        await (_db.select(_db.instruments)..limit(limit, offset: offset)).get();
+    List<Instrument> instruments = await (_db.select(_db.instruments)
+          ..where((tbl) => tbl.receivedAt.isNull())
+          ..limit(limit, offset: offset))
+        .get();
     return instruments;
   }
 

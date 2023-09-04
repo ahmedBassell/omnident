@@ -122,7 +122,7 @@ class _InstrumentCreationFormState extends State<InstrumentCreationForm> {
             SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: _createInstrument,
-              child: Text('Create'),
+              child: Text('Add'),
             ),
           ],
         ),
@@ -136,8 +136,7 @@ class _InstrumentCreationFormState extends State<InstrumentCreationForm> {
       // Create an Instrument object with the entered data
       Instrument newInstrument = await _instrumentsService.create(
         name: _name,
-        // location: _location,
-        locationId: 1,
+        locationId: _location!.id,
         imagePath: null, // You can set this to the photo URL when implemented
         lentToFriendName: _friendName,
       );
