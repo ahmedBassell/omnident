@@ -18,7 +18,8 @@ class _InstrumentsScreenState extends State<InstrumentsScreen> {
     "High-five! All instruments are settled up! 🙌",
     "No lent or misplaced instruments in sight! 🥳",
     "Your instrument inventory is shining bright ✨",
-    "Nice work! Your instrument inventory is on point 🪥"
+    "Nice work! Your instrument inventory is on point 🪥",
+    "All tools are in place ... for now 😉"
   ];
 
   @override

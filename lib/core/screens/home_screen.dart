@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:omni_dent/appointments/screens/appointments_screen.dart';
 import 'package:omni_dent/core/screens/dashboard_screen.dart';
 import 'package:omni_dent/core/widgets/appointment_creation_form.dart';
 import 'package:omni_dent/core/widgets/patient_creation_form.dart';
@@ -17,7 +18,7 @@ class _HomeScreenState extends State<HomeScreen> {
     DashboardScreen(),
     PatientsScreen(),
     Container(),
-    Container(),
+    AppointmentsScreen(),
     InstrumentsScreen(),
   ];
 
