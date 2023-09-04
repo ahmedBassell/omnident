@@ -39,6 +39,7 @@ class _InstrumentItemState extends State<InstrumentItem> {
 
   @override
   Widget build(BuildContext context) {
+    final String? _friendName = widget.instrument.lentToFriendName;
     final createdAtFormatted =
         _utilsService.formatTimestamp(widget.instrument.createdAt);
 
@@ -46,51 +47,73 @@ class _InstrumentItemState extends State<InstrumentItem> {
       margin: EdgeInsets.all(8.0),
       elevation: 2, // Add a subtle elevation for a card effect
       child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor:
-              Colors.teal.shade200, // You can use a different color
-          child: Icon(
-            Icons.handyman, // Replace with your instrument-related icon
-            color: Colors.white,
-          ),
-        ),
+        contentPadding: EdgeInsets.all(8.0),
+        titleAlignment: ListTileTitleAlignment.top,
+        leading: Column(mainAxisAlignment: MainAxisAlignment.start, children: [
+          CircleAvatar(
+            backgroundColor:
+                Colors.teal.shade200, // You can use a different color
+            child: Icon(
+              Icons.handyman, // Replace with your instrument-related icon
+              color: Colors.white,
+            ),
+          )
+        ]),
         title: Text(
-          widget.instrument.name,
-          style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+          _utilsService.capitalize(widget.instrument.name),
+          style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: 8), // Added some spacing
-            Text(
-              _location?.name ?? "NA",
-              style: TextStyle(fontSize: 16),
-            ),
-            SizedBox(height: 8), // Added some spacing
+            Row(children: [
+              Icon(Icons.location_pin, size: 14.0),
+              Text(
+                _location?.name ?? "NA",
+                style: TextStyle(fontSize: 14.0),
+              )
+            ]),
+            if (_friendName != null)
+              Row(children: [
+                SizedBox(height: 2.0), // Added some spacing
+                Icon(Icons.person, size: 14.0),
+                Text(
+                  _friendName,
+                  style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w600),
+                ),
+              ]),
+            SizedBox(height: 4.0), // Added some spacing
             Text(
               createdAtFormatted,
               style: TextStyle(fontSize: 12.0, color: Colors.grey),
             ), // Moved Created At here
           ],
         ),
-        trailing: ElevatedButton(
-            onPressed: () async {
-              await _instrumentsService.update(
-                  instrumentId: widget.instrument.id,
-                  locationId: widget.instrument.location,
-                  name: widget.instrument.name,
-                  receivedAt: DateTime.now());
-              _snackBarService.show(
-                  context, "Instrument has been marked as received!");
-              widget.onInstrumentReceived();
-            },
-            style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(100.0)),
-              backgroundColor:
-                  Colors.red.shade200, // Change button color based on status
-            ),
-            child: Icon(Icons.check)),
+        trailing: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            ElevatedButton(
+                onPressed: () async {
+                  await _instrumentsService.update(
+                      instrumentId: widget.instrument.id,
+                      locationId: widget.instrument.location,
+                      name: widget.instrument.name,
+                      receivedAt: DateTime.now());
+                  _snackBarService.show(
+                      context, "Instrument has been marked as received!");
+                  widget.onInstrumentReceived();
+                },
+                style: ElevatedButton.styleFrom(
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  padding: EdgeInsets.zero,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(8.0))),
+                  backgroundColor: Colors
+                      .red.shade200, // Change button color based on status
+                ),
+                child: Icon(Icons.check))
+          ],
+        ),
       ),
     );
   }
