@@ -82,6 +82,30 @@ class AppointmentsService {
             row.readTable(_db.appointments), row.readTable(_db.patients)))
         .get();
   }
+
+  Stream<List<AppointmentWithPatient>> watchLaterThisWeekAppointments() {
+    final query = _db.select(_db.appointments).join([
+      innerJoin(
+          _db.patients, _db.patients.id.equalsExp(_db.appointments.patient)),
+    ]);
+    DateTime tomorrowDateTime =
+        DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
+            .add(Duration(days: 1));
+    ;
+
+    query.where(_db.appointments.dateTimeFrom.isBetweenValues(
+        tomorrowDateTime, tomorrowDateTime.add(Duration(days: 7))));
+    query.orderBy([OrderingTerm.asc(_db.appointments.dateTimeFrom)]);
+
+    return query.watch().map((rows) {
+      return rows.map((row) {
+        return AppointmentWithPatient(
+          row.readTable(_db.appointments),
+          row.readTable(_db.patients),
+        );
+      }).toList();
+    });
+  }
 }
 
 class AppointmentWithPatient {

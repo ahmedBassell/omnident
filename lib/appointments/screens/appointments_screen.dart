@@ -27,28 +27,15 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
       });
     });
 
-    _appointmentsService.getLaterThisWeekAppointments().then((data) {
+    _appointmentsService.watchLaterThisWeekAppointments().listen((event) {
       setState(() {
-        _laterThisWeekAppointments = data;
+        _laterThisWeekAppointments = event;
       });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // Full screen width and height
-    double width = MediaQuery.of(context).size.width;
-    double height = MediaQuery.of(context).size.height;
-
-// Height (without SafeArea)
-    var padding = MediaQuery.of(context).viewPadding;
-    double height1 = height - padding.top - padding.bottom;
-
-// Height (without status bar)
-    double height2 = height - padding.top;
-
-// Height (without status and toolbar)
-    double height3 = height - padding.top - kToolbarHeight;
     return Scaffold(
       appBar: AppBar(
         title: Text('Appointments'),
@@ -70,7 +57,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Text(
-                'You have ${_todayAppointments.length} appointments today.',
+                'You have ${_todayAppointments.length} appointments today',
                 style: TextStyle(
                   fontSize: 18.0,
                   color: Colors.grey,

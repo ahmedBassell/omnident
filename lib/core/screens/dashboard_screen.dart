@@ -53,36 +53,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             SizedBox(height: 16),
             // Display a list of upcoming appointments with details
-            if (upcomingAppointments.isEmpty)
-              Text(
-                'No recent patients.',
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-              )
-            else
-              for (var appointmentWithPatient in upcomingAppointments)
-                _buildAppointmentCard(appointmentWithPatient),
+            // if (upcomingAppointments.isEmpty)
+            //   Text(
+            //     'No recent patients.',
+            //     style: TextStyle(fontSize: 16, color: Colors.grey),
+            //   )
+            // else
+            //   for (var appointmentWithPatient in upcomingAppointments)
+            //     _buildAppointmentCard(appointmentWithPatient),
             SizedBox(height: 32),
             Text(
               'Most Recent Patients',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 16),
-            if (recentPatients.isEmpty)
-              Text(
-                'No recent patients.',
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-              )
-            else
-              _buildRecentPatientsSection(),
+            // if (recentPatients.isEmpty)
+            //   Text(
+            //     'No recent patients.',
+            //     style: TextStyle(fontSize: 16, color: Colors.grey),
+            //   )
+            // else
+            //   _buildRecentPatientsSection(),
           ],
         ),
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: () {
-      //     _showAddOptions(context);
-      //   },
-      //   child: Icon(Icons.add),
-      // )
     );
   }
 

@@ -37,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
         type: BottomNavigationBarType.fixed,
         iconSize: 22,
         items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Patients'),
           BottomNavigationBarItem(
               icon: Icon(
