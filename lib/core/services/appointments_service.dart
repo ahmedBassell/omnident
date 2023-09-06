@@ -63,6 +63,29 @@ class AppointmentsService {
         .get();
   }
 
+  Stream<List<AppointmentWithPatient>> watchTodayAppointments() {
+    final query = _db.select(_db.appointments).join([
+      innerJoin(
+          _db.patients, _db.patients.id.equalsExp(_db.appointments.patient)),
+    ]);
+    DateTime todayDateTime =
+        DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    ;
+
+    query.where(_db.appointments.dateTimeFrom
+        .isBetweenValues(todayDateTime, todayDateTime.add(Duration(days: 1))));
+    query.orderBy([OrderingTerm.asc(_db.appointments.dateTimeFrom)]);
+
+    return query.watch().map((rows) {
+      return rows.map((row) {
+        return AppointmentWithPatient(
+          row.readTable(_db.appointments),
+          row.readTable(_db.patients),
+        );
+      }).toList();
+    });
+  }
+
   Future<List<AppointmentWithPatient>> getLaterThisWeekAppointments() async {
     final query = _db.select(_db.appointments).join([
       innerJoin(

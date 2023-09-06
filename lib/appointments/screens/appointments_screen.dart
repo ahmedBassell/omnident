@@ -1,9 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 import 'package:omni_dent/appointments/widgets/appointment_list_item.dart';
 import 'package:omni_dent/core/services/appointments_service.dart';
-import 'package:omni_dent/core/widgets/patient_avatar.dart';
 
 class AppointmentsScreen extends StatefulWidget {
   final String doctorName = "Tala";
@@ -17,21 +18,34 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
       GetIt.I<AppointmentsService>();
   late List<AppointmentWithPatient> _todayAppointments = [];
   late List<AppointmentWithPatient> _laterThisWeekAppointments = [];
+  late StreamSubscription<List<AppointmentWithPatient>>
+      _todayAppointmentsSubscription;
+  late StreamSubscription<List<AppointmentWithPatient>>
+      _laterAppointmentsSubscription;
 
   @override
   void initState() {
     super.initState();
-    _appointmentsService.getTodayAppointments().then((data) {
+    _todayAppointmentsSubscription =
+        _appointmentsService.watchTodayAppointments().listen((data) {
       setState(() {
         _todayAppointments = data;
       });
     });
 
-    _appointmentsService.watchLaterThisWeekAppointments().listen((event) {
+    _laterAppointmentsSubscription =
+        _appointmentsService.watchLaterThisWeekAppointments().listen((data) {
       setState(() {
-        _laterThisWeekAppointments = event;
+        _laterThisWeekAppointments = data;
       });
     });
+  }
+
+  @override
+  void dispose() {
+    _todayAppointmentsSubscription.cancel();
+    _laterAppointmentsSubscription.cancel();
+    super.dispose();
   }
 
   @override
