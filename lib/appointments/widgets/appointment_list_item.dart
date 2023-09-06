@@ -7,6 +7,7 @@ import 'package:omni_dent/core/widgets/appointment_creation_form.dart';
 import 'package:omni_dent/core/widgets/patient_avatar.dart';
 import 'package:intl/intl.dart';
 import 'package:omni_dent/database/database.dart';
+import 'package:omni_dent/patients/screens/patient_screen.dart';
 
 class AppointmentListItem extends StatefulWidget {
   final AppointmentWithPatient item;
@@ -99,19 +100,25 @@ class _AppointmentListItemState extends State<AppointmentListItem> {
                                     return AppointmentCreationForm(
                                         initialAppointment: _appointment);
                                   },
-                                ).whenComplete(() {
-                                  // Navigator.pop(context);
-                                });
+                                );
                               }),
                           SizedBox(width: 8.0),
-                          ClipRRect(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(20.0)),
-                              child: Container(
-                                  padding: EdgeInsets.all(8.0),
-                                  color: Colors.white,
-                                  child: Icon(Icons.arrow_forward_ios,
-                                      size: 16.0)))
+                          GestureDetector(
+                              onTap: (() {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            PatientScreen(patient: _patient)));
+                              }),
+                              child: ClipRRect(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(20.0)),
+                                  child: Container(
+                                      padding: EdgeInsets.all(8.0),
+                                      color: Colors.white,
+                                      child: Icon(Icons.arrow_forward_ios,
+                                          size: 16.0))))
                         ])
                       ]),
                 )),
