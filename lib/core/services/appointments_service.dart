@@ -23,9 +23,6 @@ class AppointmentsService {
   }
 
   Future<List<Appointment>> getPatientAppointments(int patientId) async {
-    // return appointmentsArray
-    //     .where((appointment) => appointment.patient.id == patientId)
-    //     .toList();
     return await (_db.appointments.select()
           ..where((a) => a.patient.equals(patientId)))
         .get();
@@ -128,6 +125,22 @@ class AppointmentsService {
         );
       }).toList();
     });
+  }
+
+  // Update
+  Future<Appointment> update(
+      {required int appointmentId,
+      required name,
+      required DateTime dateTime,
+      required Patient patient}) async {
+    await (_db.appointments.update()
+          ..where((tbl) => tbl.id.equals(appointmentId)))
+        .write(AppointmentsCompanion(
+            title: Value(name),
+            dateTimeFrom: Value(dateTime),
+            patient: Value(patient.id)));
+
+    return findById(appointmentId);
   }
 }
 

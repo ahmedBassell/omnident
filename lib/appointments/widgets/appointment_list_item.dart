@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:omni_dent/core/services/appointments_service.dart';
 import 'package:omni_dent/core/services/patients_service.dart';
 import 'package:omni_dent/core/services/utils_service.dart';
+import 'package:omni_dent/core/widgets/appointment_creation_form.dart';
 import 'package:omni_dent/core/widgets/patient_avatar.dart';
 import 'package:intl/intl.dart';
 import 'package:omni_dent/database/database.dart';
@@ -81,13 +82,27 @@ class _AppointmentListItemState extends State<AppointmentListItem> {
                         ),
                         Spacer(),
                         Row(children: [
-                          ClipRRect(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(20.0)),
-                              child: Container(
-                                  padding: EdgeInsets.all(8.0),
-                                  color: Colors.white,
-                                  child: Icon(Icons.edit, size: 16.0))),
+                          GestureDetector(
+                              child: ClipRRect(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(20.0)),
+                                  child: Container(
+                                      padding: EdgeInsets.all(8.0),
+                                      color: Colors.white,
+                                      child: Icon(Icons.edit, size: 16.0))),
+                              onTap: () {
+                                print('edit appointment');
+                                print(_appointment.id);
+                                showModalBottomSheet(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AppointmentCreationForm(
+                                        initialAppointment: _appointment);
+                                  },
+                                ).whenComplete(() {
+                                  // Navigator.pop(context);
+                                });
+                              }),
                           SizedBox(width: 8.0),
                           ClipRRect(
                               borderRadius:

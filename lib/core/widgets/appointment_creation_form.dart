@@ -7,6 +7,10 @@ import 'package:omni_dent/core/services/patients_service.dart';
 import 'package:omni_dent/database/database.dart';
 
 class AppointmentCreationForm extends StatefulWidget {
+  final Appointment? initialAppointment;
+
+  AppointmentCreationForm({this.initialAppointment});
+
   @override
   _AppointmentCreationFormState createState() =>
       _AppointmentCreationFormState();
@@ -31,8 +35,18 @@ class _AppointmentCreationFormState extends State<AppointmentCreationForm> {
     _patientsService.getPatients().then((existingPatients) {
       setState(() {
         patients = existingPatients;
+        _selectedPatient = patients.singleWhere(
+            (element) => element.id == widget.initialAppointment?.patient);
       });
     });
+
+    if (widget.initialAppointment != null) {
+      // Initialize the form fields if editing an existing appointment
+      final initialAppointment = widget.initialAppointment!;
+      _appointmentName = initialAppointment.title;
+      _dateTime = initialAppointment.dateTimeFrom;
+      _selectedPatient = null;
+    }
   }
 
   @override
@@ -46,11 +60,14 @@ class _AppointmentCreationFormState extends State<AppointmentCreationForm> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Create New Appointment',
+                widget.initialAppointment == null
+                    ? 'Create New Appointment'
+                    : 'Edit Appointment',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 16),
               TextFormField(
+                initialValue: _appointmentName,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter appointment name';
@@ -92,22 +109,31 @@ class _AppointmentCreationFormState extends State<AppointmentCreationForm> {
                 }).toList(),
                 decoration: InputDecoration(labelText: 'Select Patient'),
               ),
-              SizedBox(height: 16),
-              TextFormField(
-                onSaved: (value) => _notes = value,
-                decoration: InputDecoration(labelText: 'Notes'),
-                maxLines: 4,
-              ),
+              // SizedBox(height: 16),
+              // TextFormField(
+              //   initialValue: _notes,
+              //   onSaved: (value) => _notes = value,
+              //   decoration: InputDecoration(labelText: 'Notes'),
+              //   maxLines: 4,
+              // ),
               SizedBox(height: 32),
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     _formKey.currentState!.save();
-                    // Create appointment logic here
-                    _appointmentsService.createAppointment(
-                        name: _appointmentName,
-                        dateTime: _dateTime,
-                        patient: _selectedPatient!);
+                    if (widget.initialAppointment == null) {
+                      // Create appointment logic here
+                      _appointmentsService.createAppointment(
+                          name: _appointmentName,
+                          dateTime: _dateTime,
+                          patient: _selectedPatient!);
+                    } else {
+                      _appointmentsService.update(
+                          appointmentId: widget.initialAppointment!.id,
+                          name: _appointmentName,
+                          dateTime: _dateTime,
+                          patient: _selectedPatient!);
+                    }
                     Navigator.pop(
                         context); // Close the bottom sheet after submission
                   }
@@ -115,7 +141,11 @@ class _AppointmentCreationFormState extends State<AppointmentCreationForm> {
                 style: ElevatedButton.styleFrom(
                   padding: EdgeInsets.symmetric(vertical: 16),
                 ),
-                child: Text('Create Appointment'),
+                child: Text(
+                  widget.initialAppointment == null
+                      ? 'Create Appointment'
+                      : 'Update Appointment',
+                ),
               ),
             ],
           ),
