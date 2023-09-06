@@ -5,23 +5,21 @@ import 'package:omni_dent/database/database.dart';
 class AppointmentsService {
   // static List<Appointment> appointmentsArray = [];
   OmniDatabase get _db => GetIt.I<OmniDatabase>();
-  Appointment createAppointment(
-      {required name, required DateTime dateTime, required Patient patient}) {
-    int id = _calculateNextId();
-    Appointment appointment = Appointment(
-        id: id,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-        patient: patient.id,
-        location: 0,
-        title: "title",
-        dateTimeFrom: dateTime);
-    _db.appointments.insertOne(appointment);
-    return appointment;
+  Future<Appointment> createAppointment(
+      {required name,
+      required DateTime dateTime,
+      required Patient patient}) async {
+    int appointmentId = await _db.appointments.insertOne(
+        AppointmentsCompanion.insert(
+            title: name, patient: patient.id, dateTimeFrom: Value(dateTime)));
+    return findById(appointmentId);
   }
 
-  int _calculateNextId() {
-    return 1;
+  // Read
+  Future<Appointment> findById(int appointmentId) async {
+    return await (_db.appointments.select()
+          ..where((tbl) => tbl.id.equals(appointmentId)))
+        .getSingle();
   }
 
   Future<List<Appointment>> getPatientAppointments(int patientId) async {
@@ -33,7 +31,23 @@ class AppointmentsService {
         .get();
   }
 
-  Future<List<Appointment>> getAppointments() async {
-    return await _db.appointments.all().get();
+  Future<List<AppointmentWithPatient>> getAppointments() async {
+    final query = _db.select(_db.appointments).join([
+      innerJoin(
+          _db.patients, _db.patients.id.equalsExp(_db.appointments.patient)),
+    ]);
+    query.orderBy([OrderingTerm.asc(_db.appointments.dateTimeFrom)]);
+
+    return query
+        .map((row) => AppointmentWithPatient(
+            row.readTable(_db.appointments), row.readTable(_db.patients)))
+        .get();
   }
+}
+
+class AppointmentWithPatient {
+  AppointmentWithPatient(this.appointment, this.patient);
+
+  final Appointment appointment;
+  final Patient patient;
 }

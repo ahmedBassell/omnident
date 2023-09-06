@@ -17,7 +17,7 @@ class _AppointmentCreationFormState extends State<AppointmentCreationForm> {
   AppointmentsService get _appointmentsService =>
       GetIt.I<AppointmentsService>();
 
-  late final List<Patient> patients;
+  late List<Patient> patients = [];
   final _formKey = GlobalKey<FormState>();
 
   String? _appointmentName;
@@ -29,7 +29,9 @@ class _AppointmentCreationFormState extends State<AppointmentCreationForm> {
   void initState() {
     super.initState();
     _patientsService.getPatients().then((existingPatients) {
-      patients = existingPatients;
+      setState(() {
+        patients = existingPatients;
+      });
     });
   }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:omni_dent/core/services/patients_service.dart';
+import 'package:omni_dent/core/widgets/patient_creation_form.dart';
 import 'package:omni_dent/database/database.dart';
 
 class PatientsScreen extends StatefulWidget {
@@ -95,6 +96,15 @@ class PatientItem extends StatelessWidget {
         onSelected: (value) {
           if (value == 'update') {
             // Handle update action
+
+            showModalBottomSheet(
+              context: context,
+              builder: (BuildContext context) {
+                return PatientCreationForm(existingPatient: patient);
+              },
+            ).whenComplete(() {
+              // Navigator.pop(context);
+            });
           } else if (value == 'delete') {
             // Handle delete action
           }

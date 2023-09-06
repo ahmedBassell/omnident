@@ -9,11 +9,17 @@ class PatientsService {
   // Create
   Future<Patient> createPatient(
       {required String name,
+      required Gender gender,
       String? phone,
       String? email,
-      String? notes}) async {
-    int patientId = await _db.patients
-        .insertOne(PatientsCompanion.insert(name: name, gender: Gender.male));
+      String? notes,
+      DateTime? birthDate}) async {
+    DateTime _defaultBirthDate = DateTime(1990);
+    int patientId = await _db.patients.insertOne(PatientsCompanion.insert(
+        name: name,
+        gender: gender,
+        birthDate:
+            (birthDate == null ? Value(_defaultBirthDate) : Value(birthDate))));
     return findById(patientId);
   }
 
@@ -34,15 +40,21 @@ class PatientsService {
   Future<Patient> update(
       {required int patientId,
       required String name,
-      Gender? gender,
+      required gender,
       String? phone,
-      String? email}) async {
+      String? email,
+      DateTime? birthDate}) async {
+    DateTime _defaultBirthDate = DateTime(1990);
     await (_db.patients.update()..where((tbl) => tbl.id.equals(patientId)))
         .write(PatientsCompanion(
             name: Value(name),
-            phone: Value(phone),
-            email: Value(email),
-            gender: Value(gender ?? Gender.none)));
+
+            // phone: Value(phone),
+            // email: Value(email),
+            gender: Value(gender),
+            birthDate: (birthDate == null
+                ? Value(_defaultBirthDate)
+                : Value(birthDate))));
 
     return findById(patientId);
   }

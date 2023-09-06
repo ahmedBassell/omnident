@@ -19,7 +19,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   PatientsService get _patientsService => GetIt.I<PatientsService>();
   AppointmentsService get _appointmentsService =>
       GetIt.I<AppointmentsService>();
-  List<Appointment> upcomingAppointments = [];
+  List<AppointmentWithPatient> upcomingAppointments = [];
   List<Patient> recentPatients = [];
 
   @override
@@ -29,6 +29,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _patientsService.getPatients().then((patients) {
       setState(() {
         recentPatients = patients;
+      });
+    });
+    _appointmentsService.getAppointments().then((data) {
+      setState(() {
+        upcomingAppointments = data;
       });
     });
   }
@@ -54,8 +59,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 style: TextStyle(fontSize: 16, color: Colors.grey),
               )
             else
-              for (var appointment in upcomingAppointments)
-                _buildAppointmentCard(appointment),
+              for (var appointmentWithPatient in upcomingAppointments)
+                _buildAppointmentCard(appointmentWithPatient),
             SizedBox(height: 32),
             Text(
               'Most Recent Patients',
@@ -146,6 +151,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           setState(() async {
             recentPatients = await _patientsService.getPatients();
             upcomingAppointments = await _appointmentsService.getAppointments();
+            print(upcomingAppointments);
           })
         });
   }
@@ -164,12 +170,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildAppointmentCard(Appointment appointment) {
+  Widget _buildAppointmentCard(AppointmentWithPatient appointmentWithPatient) {
+    final appointment = appointmentWithPatient.appointment;
+    final patient = appointmentWithPatient.patient;
     return Card(
       elevation: 2,
       margin: EdgeInsets.only(bottom: 16),
       child: ListTile(
-        title: Text("appointment.patient.name"),
+        title: Text(patient.name),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -179,6 +187,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             Text(
               'Time: ${appointment.dateTimeFrom.hour}:${appointment.dateTimeFrom.minute}',
+            ),
+            Text(
+              'Gender: ${patient.gender.name}',
             ),
           ],
         ),
