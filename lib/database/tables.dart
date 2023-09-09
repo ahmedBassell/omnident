@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:omni_dent/core/models/gender.dart';
+import 'package:omni_dent/core/models/tooth_name.dart';
 import 'package:omni_dent/core/models/tooth_state.dart';
 
 mixin AutoIncrementingPrimaryKey on Table {
@@ -55,10 +56,10 @@ class Appointments extends Table with AutoIncrementingPrimaryKey, TimeStamps {
 class Sessions extends Table with AutoIncrementingPrimaryKey, TimeStamps {
   IntColumn get patient => integer().references(Patients, #id)();
   TextColumn get title => text().withLength(min: 2, max: 32)();
-  DateTimeColumn get dateTimeFrom => dateTime()
-      .check(dateTimeFrom.isBiggerThan(currentDateAndTime))
-      .withDefault(currentDateAndTime)();
+  DateTimeColumn get dateTimeFrom =>
+      dateTime().withDefault(currentDateAndTime)();
   TextColumn get treatment => text().withLength(min: 0, max: 512)();
+  TextColumn get symptoms => text().withLength(min: 0, max: 512).nullable()();
 }
 
 @DataClassName("SessionTooth")
@@ -66,8 +67,7 @@ class SessionTeeth extends Table with AutoIncrementingPrimaryKey, TimeStamps {
   IntColumn get patient => integer().references(Patients, #id)();
   IntColumn get session => integer().references(Sessions, #id)();
   TextColumn get state => textEnum<ToothState>()();
-  IntColumn get toothNum => integer()
-      .check(toothNum.isBetween(const Constant(1), const Constant(32)))();
+  TextColumn get toothName => textEnum<ToothName>()();
 }
 
 class SessionAttachments extends Table

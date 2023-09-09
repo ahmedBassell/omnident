@@ -3,7 +3,6 @@ import 'package:get_it/get_it.dart';
 import 'package:omni_dent/database/database.dart';
 
 class AppointmentsService {
-  // static List<Appointment> appointmentsArray = [];
   OmniDatabase get _db => GetIt.I<OmniDatabase>();
   Future<Appointment> createAppointment(
       {required name,

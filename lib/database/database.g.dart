@@ -1685,7 +1685,6 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
   @override
   late final GeneratedColumn<DateTime> dateTimeFrom = GeneratedColumn<DateTime>(
       'date_time_from', aliasedName, false,
-      check: () => dateTimeFrom.isBiggerThan(currentDateAndTime),
       type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
@@ -1698,9 +1697,26 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
           GeneratedColumn.checkTextLength(minTextLength: 0, maxTextLength: 512),
       type: DriftSqlType.string,
       requiredDuringInsert: true);
+  static const VerificationMeta _symptomsMeta =
+      const VerificationMeta('symptoms');
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, createdAt, updatedAt, patient, title, dateTimeFrom, treatment];
+  late final GeneratedColumn<String> symptoms = GeneratedColumn<String>(
+      'symptoms', aliasedName, true,
+      additionalChecks:
+          GeneratedColumn.checkTextLength(minTextLength: 0, maxTextLength: 512),
+      type: DriftSqlType.string,
+      requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        createdAt,
+        updatedAt,
+        patient,
+        title,
+        dateTimeFrom,
+        treatment,
+        symptoms
+      ];
   @override
   String get aliasedName => _alias ?? 'sessions';
   @override
@@ -1745,6 +1761,10 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
     } else if (isInserting) {
       context.missing(_treatmentMeta);
     }
+    if (data.containsKey('symptoms')) {
+      context.handle(_symptomsMeta,
+          symptoms.isAcceptableOrUnknown(data['symptoms']!, _symptomsMeta));
+    }
     return context;
   }
 
@@ -1768,6 +1788,8 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
           DriftSqlType.dateTime, data['${effectivePrefix}date_time_from'])!,
       treatment: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}treatment'])!,
+      symptoms: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}symptoms']),
     );
   }
 
@@ -1785,6 +1807,7 @@ class Session extends DataClass implements Insertable<Session> {
   final String title;
   final DateTime dateTimeFrom;
   final String treatment;
+  final String? symptoms;
   const Session(
       {required this.id,
       required this.createdAt,
@@ -1792,7 +1815,8 @@ class Session extends DataClass implements Insertable<Session> {
       required this.patient,
       required this.title,
       required this.dateTimeFrom,
-      required this.treatment});
+      required this.treatment,
+      this.symptoms});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1803,6 +1827,9 @@ class Session extends DataClass implements Insertable<Session> {
     map['title'] = Variable<String>(title);
     map['date_time_from'] = Variable<DateTime>(dateTimeFrom);
     map['treatment'] = Variable<String>(treatment);
+    if (!nullToAbsent || symptoms != null) {
+      map['symptoms'] = Variable<String>(symptoms);
+    }
     return map;
   }
 
@@ -1815,6 +1842,9 @@ class Session extends DataClass implements Insertable<Session> {
       title: Value(title),
       dateTimeFrom: Value(dateTimeFrom),
       treatment: Value(treatment),
+      symptoms: symptoms == null && nullToAbsent
+          ? const Value.absent()
+          : Value(symptoms),
     );
   }
 
@@ -1829,6 +1859,7 @@ class Session extends DataClass implements Insertable<Session> {
       title: serializer.fromJson<String>(json['title']),
       dateTimeFrom: serializer.fromJson<DateTime>(json['dateTimeFrom']),
       treatment: serializer.fromJson<String>(json['treatment']),
+      symptoms: serializer.fromJson<String?>(json['symptoms']),
     );
   }
   @override
@@ -1842,6 +1873,7 @@ class Session extends DataClass implements Insertable<Session> {
       'title': serializer.toJson<String>(title),
       'dateTimeFrom': serializer.toJson<DateTime>(dateTimeFrom),
       'treatment': serializer.toJson<String>(treatment),
+      'symptoms': serializer.toJson<String?>(symptoms),
     };
   }
 
@@ -1852,7 +1884,8 @@ class Session extends DataClass implements Insertable<Session> {
           int? patient,
           String? title,
           DateTime? dateTimeFrom,
-          String? treatment}) =>
+          String? treatment,
+          Value<String?> symptoms = const Value.absent()}) =>
       Session(
         id: id ?? this.id,
         createdAt: createdAt ?? this.createdAt,
@@ -1861,6 +1894,7 @@ class Session extends DataClass implements Insertable<Session> {
         title: title ?? this.title,
         dateTimeFrom: dateTimeFrom ?? this.dateTimeFrom,
         treatment: treatment ?? this.treatment,
+        symptoms: symptoms.present ? symptoms.value : this.symptoms,
       );
   @override
   String toString() {
@@ -1871,14 +1905,15 @@ class Session extends DataClass implements Insertable<Session> {
           ..write('patient: $patient, ')
           ..write('title: $title, ')
           ..write('dateTimeFrom: $dateTimeFrom, ')
-          ..write('treatment: $treatment')
+          ..write('treatment: $treatment, ')
+          ..write('symptoms: $symptoms')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
-      id, createdAt, updatedAt, patient, title, dateTimeFrom, treatment);
+  int get hashCode => Object.hash(id, createdAt, updatedAt, patient, title,
+      dateTimeFrom, treatment, symptoms);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1889,7 +1924,8 @@ class Session extends DataClass implements Insertable<Session> {
           other.patient == this.patient &&
           other.title == this.title &&
           other.dateTimeFrom == this.dateTimeFrom &&
-          other.treatment == this.treatment);
+          other.treatment == this.treatment &&
+          other.symptoms == this.symptoms);
 }
 
 class SessionsCompanion extends UpdateCompanion<Session> {
@@ -1900,6 +1936,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
   final Value<String> title;
   final Value<DateTime> dateTimeFrom;
   final Value<String> treatment;
+  final Value<String?> symptoms;
   const SessionsCompanion({
     this.id = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -1908,6 +1945,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     this.title = const Value.absent(),
     this.dateTimeFrom = const Value.absent(),
     this.treatment = const Value.absent(),
+    this.symptoms = const Value.absent(),
   });
   SessionsCompanion.insert({
     this.id = const Value.absent(),
@@ -1917,6 +1955,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     required String title,
     this.dateTimeFrom = const Value.absent(),
     required String treatment,
+    this.symptoms = const Value.absent(),
   })  : patient = Value(patient),
         title = Value(title),
         treatment = Value(treatment);
@@ -1928,6 +1967,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     Expression<String>? title,
     Expression<DateTime>? dateTimeFrom,
     Expression<String>? treatment,
+    Expression<String>? symptoms,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1937,6 +1977,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
       if (title != null) 'title': title,
       if (dateTimeFrom != null) 'date_time_from': dateTimeFrom,
       if (treatment != null) 'treatment': treatment,
+      if (symptoms != null) 'symptoms': symptoms,
     });
   }
 
@@ -1947,7 +1988,8 @@ class SessionsCompanion extends UpdateCompanion<Session> {
       Value<int>? patient,
       Value<String>? title,
       Value<DateTime>? dateTimeFrom,
-      Value<String>? treatment}) {
+      Value<String>? treatment,
+      Value<String?>? symptoms}) {
     return SessionsCompanion(
       id: id ?? this.id,
       createdAt: createdAt ?? this.createdAt,
@@ -1956,6 +1998,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
       title: title ?? this.title,
       dateTimeFrom: dateTimeFrom ?? this.dateTimeFrom,
       treatment: treatment ?? this.treatment,
+      symptoms: symptoms ?? this.symptoms,
     );
   }
 
@@ -1983,6 +2026,9 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     if (treatment.present) {
       map['treatment'] = Variable<String>(treatment.value);
     }
+    if (symptoms.present) {
+      map['symptoms'] = Variable<String>(symptoms.value);
+    }
     return map;
   }
 
@@ -1995,7 +2041,8 @@ class SessionsCompanion extends UpdateCompanion<Session> {
           ..write('patient: $patient, ')
           ..write('title: $title, ')
           ..write('dateTimeFrom: $dateTimeFrom, ')
-          ..write('treatment: $treatment')
+          ..write('treatment: $treatment, ')
+          ..write('symptoms: $symptoms')
           ..write(')'))
         .toString();
   }
@@ -2056,17 +2103,16 @@ class $SessionTeethTable extends SessionTeeth
       GeneratedColumn<String>('state', aliasedName, false,
               type: DriftSqlType.string, requiredDuringInsert: true)
           .withConverter<ToothState>($SessionTeethTable.$converterstate);
-  static const VerificationMeta _toothNumMeta =
-      const VerificationMeta('toothNum');
+  static const VerificationMeta _toothNameMeta =
+      const VerificationMeta('toothName');
   @override
-  late final GeneratedColumn<int> toothNum = GeneratedColumn<int>(
-      'tooth_num', aliasedName, false,
-      check: () => toothNum.isBetween(const Constant(1), const Constant(32)),
-      type: DriftSqlType.int,
-      requiredDuringInsert: true);
+  late final GeneratedColumnWithTypeConverter<ToothName, String> toothName =
+      GeneratedColumn<String>('tooth_name', aliasedName, false,
+              type: DriftSqlType.string, requiredDuringInsert: true)
+          .withConverter<ToothName>($SessionTeethTable.$convertertoothName);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, createdAt, updatedAt, patient, session, state, toothNum];
+      [id, createdAt, updatedAt, patient, session, state, toothName];
   @override
   String get aliasedName => _alias ?? 'session_teeth';
   @override
@@ -2100,12 +2146,7 @@ class $SessionTeethTable extends SessionTeeth
       context.missing(_sessionMeta);
     }
     context.handle(_stateMeta, const VerificationResult.success());
-    if (data.containsKey('tooth_num')) {
-      context.handle(_toothNumMeta,
-          toothNum.isAcceptableOrUnknown(data['tooth_num']!, _toothNumMeta));
-    } else if (isInserting) {
-      context.missing(_toothNumMeta);
-    }
+    context.handle(_toothNameMeta, const VerificationResult.success());
     return context;
   }
 
@@ -2128,8 +2169,9 @@ class $SessionTeethTable extends SessionTeeth
       state: $SessionTeethTable.$converterstate.fromSql(attachedDatabase
           .typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}state'])!),
-      toothNum: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}tooth_num'])!,
+      toothName: $SessionTeethTable.$convertertoothName.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}tooth_name'])!),
     );
   }
 
@@ -2140,6 +2182,8 @@ class $SessionTeethTable extends SessionTeeth
 
   static JsonTypeConverter2<ToothState, String, String> $converterstate =
       const EnumNameConverter<ToothState>(ToothState.values);
+  static JsonTypeConverter2<ToothName, String, String> $convertertoothName =
+      const EnumNameConverter<ToothName>(ToothName.values);
 }
 
 class SessionTooth extends DataClass implements Insertable<SessionTooth> {
@@ -2149,7 +2193,7 @@ class SessionTooth extends DataClass implements Insertable<SessionTooth> {
   final int patient;
   final int session;
   final ToothState state;
-  final int toothNum;
+  final ToothName toothName;
   const SessionTooth(
       {required this.id,
       required this.createdAt,
@@ -2157,7 +2201,7 @@ class SessionTooth extends DataClass implements Insertable<SessionTooth> {
       required this.patient,
       required this.session,
       required this.state,
-      required this.toothNum});
+      required this.toothName});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -2170,7 +2214,10 @@ class SessionTooth extends DataClass implements Insertable<SessionTooth> {
       final converter = $SessionTeethTable.$converterstate;
       map['state'] = Variable<String>(converter.toSql(state));
     }
-    map['tooth_num'] = Variable<int>(toothNum);
+    {
+      final converter = $SessionTeethTable.$convertertoothName;
+      map['tooth_name'] = Variable<String>(converter.toSql(toothName));
+    }
     return map;
   }
 
@@ -2182,7 +2229,7 @@ class SessionTooth extends DataClass implements Insertable<SessionTooth> {
       patient: Value(patient),
       session: Value(session),
       state: Value(state),
-      toothNum: Value(toothNum),
+      toothName: Value(toothName),
     );
   }
 
@@ -2197,7 +2244,8 @@ class SessionTooth extends DataClass implements Insertable<SessionTooth> {
       session: serializer.fromJson<int>(json['session']),
       state: $SessionTeethTable.$converterstate
           .fromJson(serializer.fromJson<String>(json['state'])),
-      toothNum: serializer.fromJson<int>(json['toothNum']),
+      toothName: $SessionTeethTable.$convertertoothName
+          .fromJson(serializer.fromJson<String>(json['toothName'])),
     );
   }
   @override
@@ -2211,7 +2259,8 @@ class SessionTooth extends DataClass implements Insertable<SessionTooth> {
       'session': serializer.toJson<int>(session),
       'state': serializer
           .toJson<String>($SessionTeethTable.$converterstate.toJson(state)),
-      'toothNum': serializer.toJson<int>(toothNum),
+      'toothName': serializer.toJson<String>(
+          $SessionTeethTable.$convertertoothName.toJson(toothName)),
     };
   }
 
@@ -2222,7 +2271,7 @@ class SessionTooth extends DataClass implements Insertable<SessionTooth> {
           int? patient,
           int? session,
           ToothState? state,
-          int? toothNum}) =>
+          ToothName? toothName}) =>
       SessionTooth(
         id: id ?? this.id,
         createdAt: createdAt ?? this.createdAt,
@@ -2230,7 +2279,7 @@ class SessionTooth extends DataClass implements Insertable<SessionTooth> {
         patient: patient ?? this.patient,
         session: session ?? this.session,
         state: state ?? this.state,
-        toothNum: toothNum ?? this.toothNum,
+        toothName: toothName ?? this.toothName,
       );
   @override
   String toString() {
@@ -2241,14 +2290,14 @@ class SessionTooth extends DataClass implements Insertable<SessionTooth> {
           ..write('patient: $patient, ')
           ..write('session: $session, ')
           ..write('state: $state, ')
-          ..write('toothNum: $toothNum')
+          ..write('toothName: $toothName')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode =>
-      Object.hash(id, createdAt, updatedAt, patient, session, state, toothNum);
+      Object.hash(id, createdAt, updatedAt, patient, session, state, toothName);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2259,7 +2308,7 @@ class SessionTooth extends DataClass implements Insertable<SessionTooth> {
           other.patient == this.patient &&
           other.session == this.session &&
           other.state == this.state &&
-          other.toothNum == this.toothNum);
+          other.toothName == this.toothName);
 }
 
 class SessionTeethCompanion extends UpdateCompanion<SessionTooth> {
@@ -2269,7 +2318,7 @@ class SessionTeethCompanion extends UpdateCompanion<SessionTooth> {
   final Value<int> patient;
   final Value<int> session;
   final Value<ToothState> state;
-  final Value<int> toothNum;
+  final Value<ToothName> toothName;
   const SessionTeethCompanion({
     this.id = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -2277,7 +2326,7 @@ class SessionTeethCompanion extends UpdateCompanion<SessionTooth> {
     this.patient = const Value.absent(),
     this.session = const Value.absent(),
     this.state = const Value.absent(),
-    this.toothNum = const Value.absent(),
+    this.toothName = const Value.absent(),
   });
   SessionTeethCompanion.insert({
     this.id = const Value.absent(),
@@ -2286,11 +2335,11 @@ class SessionTeethCompanion extends UpdateCompanion<SessionTooth> {
     required int patient,
     required int session,
     required ToothState state,
-    required int toothNum,
+    required ToothName toothName,
   })  : patient = Value(patient),
         session = Value(session),
         state = Value(state),
-        toothNum = Value(toothNum);
+        toothName = Value(toothName);
   static Insertable<SessionTooth> custom({
     Expression<int>? id,
     Expression<DateTime>? createdAt,
@@ -2298,7 +2347,7 @@ class SessionTeethCompanion extends UpdateCompanion<SessionTooth> {
     Expression<int>? patient,
     Expression<int>? session,
     Expression<String>? state,
-    Expression<int>? toothNum,
+    Expression<String>? toothName,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -2307,7 +2356,7 @@ class SessionTeethCompanion extends UpdateCompanion<SessionTooth> {
       if (patient != null) 'patient': patient,
       if (session != null) 'session': session,
       if (state != null) 'state': state,
-      if (toothNum != null) 'tooth_num': toothNum,
+      if (toothName != null) 'tooth_name': toothName,
     });
   }
 
@@ -2318,7 +2367,7 @@ class SessionTeethCompanion extends UpdateCompanion<SessionTooth> {
       Value<int>? patient,
       Value<int>? session,
       Value<ToothState>? state,
-      Value<int>? toothNum}) {
+      Value<ToothName>? toothName}) {
     return SessionTeethCompanion(
       id: id ?? this.id,
       createdAt: createdAt ?? this.createdAt,
@@ -2326,7 +2375,7 @@ class SessionTeethCompanion extends UpdateCompanion<SessionTooth> {
       patient: patient ?? this.patient,
       session: session ?? this.session,
       state: state ?? this.state,
-      toothNum: toothNum ?? this.toothNum,
+      toothName: toothName ?? this.toothName,
     );
   }
 
@@ -2352,8 +2401,9 @@ class SessionTeethCompanion extends UpdateCompanion<SessionTooth> {
       final converter = $SessionTeethTable.$converterstate;
       map['state'] = Variable<String>(converter.toSql(state.value));
     }
-    if (toothNum.present) {
-      map['tooth_num'] = Variable<int>(toothNum.value);
+    if (toothName.present) {
+      final converter = $SessionTeethTable.$convertertoothName;
+      map['tooth_name'] = Variable<String>(converter.toSql(toothName.value));
     }
     return map;
   }
@@ -2367,7 +2417,7 @@ class SessionTeethCompanion extends UpdateCompanion<SessionTooth> {
           ..write('patient: $patient, ')
           ..write('session: $session, ')
           ..write('state: $state, ')
-          ..write('toothNum: $toothNum')
+          ..write('toothName: $toothName')
           ..write(')'))
         .toString();
   }

@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
 import 'package:omni_dent/core/models/gender.dart';
 import 'package:omni_dent/core/models/tooth_state.dart';
+import 'package:omni_dent/core/models/tooth_name.dart';
 import 'package:omni_dent/database/tables.dart';
 import 'connection/connection.dart' as conn;
 

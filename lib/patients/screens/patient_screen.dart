@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:intl/intl.dart';
+import 'package:omni_dent/core/models/tooth_state.dart';
 import 'package:omni_dent/core/services/patients_service.dart';
 import 'package:omni_dent/core/widgets/patient_avatar.dart';
 import 'package:omni_dent/database/database.dart';
+import 'package:omni_dent/sessions/widgets/session_item.dart';
+import 'package:omni_dent/sessions/widgets/sessions_list.dart';
 
 class PatientScreen extends StatefulWidget {
   final Patient patient;
@@ -16,13 +20,14 @@ class PatientScreen extends StatefulWidget {
 class _PatientScreenState extends State<PatientScreen> {
   PatientsService get _patientsService => GetIt.I<PatientsService>();
   int _currentIndex = 0;
-  final List<Widget> _tabs = [
-    SessionsTab(),
-    AttachmentsTab(),
-  ];
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> _tabs = [
+      SessionsTab(patient: widget.patient),
+      AttachmentsTab(),
+    ];
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Patient Profile'),
@@ -41,16 +46,17 @@ class _PatientScreenState extends State<PatientScreen> {
 
   Widget _buildPatientProfile() {
     int _age = _patientsService.calculateAge(widget.patient);
-    DateTime _lastVisit = DateTime(2023);
+    String _lastVisit = DateFormat('E, MMM d y').format(DateTime(2023));
     return Container(
+      width: double.infinity,
       padding: EdgeInsets.all(16),
+      color: Colors.white, // Set the background color to white
       child: Column(
         children: [
           PatientAvatar(displayName: widget.patient.name, radius: 50),
           SizedBox(height: 16),
           Text(
-            widget.patient
-                .name, // Access patient data from the widget's parameter
+            widget.patient.name,
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           Text('Age: ${_age} | Sex: ${widget.patient.gender.name}'),
@@ -62,6 +68,7 @@ class _PatientScreenState extends State<PatientScreen> {
 
   Widget _buildTabBar() {
     return Container(
+      color: Colors.white,
       padding: EdgeInsets.symmetric(vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -85,7 +92,9 @@ class _PatientScreenState extends State<PatientScreen> {
         decoration: BoxDecoration(
           border: Border(
             bottom: BorderSide(
-              color: _currentIndex == index ? Colors.blue : Colors.transparent,
+              color: _currentIndex == index
+                  ? Colors.teal.shade200
+                  : Colors.transparent,
               width: 2.0,
             ),
           ),
@@ -95,7 +104,7 @@ class _PatientScreenState extends State<PatientScreen> {
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: _currentIndex == index ? Colors.blue : Colors.black,
+            color: _currentIndex == index ? Colors.teal.shade200 : Colors.black,
           ),
         ),
       ),
@@ -104,11 +113,16 @@ class _PatientScreenState extends State<PatientScreen> {
 }
 
 class SessionsTab extends StatelessWidget {
+  final Patient patient;
+
+  const SessionsTab({super.key, required this.patient});
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Text('Sessions Tab Content'),
-    );
+    return SessionsList(patient: patient);
+  }
+
+  void onCreateSession() {
+    print("Create new session here");
   }
 }
 

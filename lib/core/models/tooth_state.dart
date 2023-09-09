@@ -1,1 +1,1 @@
-enum ToothState { none, decayed, extracted }
+enum ToothState { none, decayed, extracted, cavity }

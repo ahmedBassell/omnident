@@ -35,8 +35,10 @@ class _AppointmentCreationFormState extends State<AppointmentCreationForm> {
     _patientsService.getPatients().then((existingPatients) {
       setState(() {
         patients = existingPatients;
-        _selectedPatient = patients.singleWhere(
-            (element) => element.id == widget.initialAppointment?.patient);
+        _selectedPatient = widget.initialAppointment == null
+            ? null
+            : patients.singleWhere(
+                (element) => element.id == widget.initialAppointment?.patient);
       });
     });
 
