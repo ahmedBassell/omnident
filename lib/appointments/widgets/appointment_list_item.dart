@@ -92,8 +92,6 @@ class _AppointmentListItemState extends State<AppointmentListItem> {
                                       color: Colors.white,
                                       child: Icon(Icons.edit, size: 16.0))),
                               onTap: () {
-                                print('edit appointment');
-                                print(_appointment.id);
                                 showModalBottomSheet(
                                   context: context,
                                   builder: (BuildContext context) {

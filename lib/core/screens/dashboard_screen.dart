@@ -150,7 +150,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       margin: EdgeInsets.only(bottom: 16),
       child: ListTile(
         title: Text(name),
-        subtitle: Text('$age | $gender'),
+        subtitle: Text('$age · $gender'),
         leading: CircleAvatar(
           backgroundColor: bgColor,
           foregroundColor: Colors.white,

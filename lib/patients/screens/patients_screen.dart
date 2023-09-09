@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:omni_dent/core/services/patients_service.dart';
+import 'package:omni_dent/core/widgets/patient_avatar.dart';
 import 'package:omni_dent/core/widgets/patient_creation_form.dart';
 import 'package:omni_dent/database/database.dart';
+import 'package:omni_dent/patients/widgets/patient_item.dart';
 
 class PatientsScreen extends StatefulWidget {
   const PatientsScreen({super.key});
@@ -67,48 +69,6 @@ class _PatientsScreenState extends State<PatientsScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class PatientItem extends StatelessWidget {
-  final Patient patient;
-
-  PatientItem({required this.patient});
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      title: Text(patient.name),
-      subtitle: Text(patient.phone ?? "+2***********"),
-      trailing: PopupMenuButton<String>(
-        itemBuilder: (context) => [
-          PopupMenuItem<String>(
-            value: 'update',
-            child: Text('Update'),
-          ),
-          PopupMenuItem<String>(
-            value: 'delete',
-            child: Text('Delete'),
-          ),
-        ],
-        onSelected: (value) {
-          if (value == 'update') {
-            // Handle update action
-
-            showModalBottomSheet(
-              context: context,
-              builder: (BuildContext context) {
-                return PatientCreationForm(existingPatient: patient);
-              },
-            ).whenComplete(() {
-              // Navigator.pop(context);
-            });
-          } else if (value == 'delete') {
-            // Handle delete action
-          }
-        },
       ),
     );
   }

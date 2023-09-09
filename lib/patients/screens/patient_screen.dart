@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
-import 'package:omni_dent/core/models/tooth_state.dart';
 import 'package:omni_dent/core/services/patients_service.dart';
 import 'package:omni_dent/core/widgets/patient_avatar.dart';
 import 'package:omni_dent/database/database.dart';
-import 'package:omni_dent/sessions/widgets/session_item.dart';
 import 'package:omni_dent/sessions/widgets/sessions_list.dart';
 
 class PatientScreen extends StatefulWidget {
