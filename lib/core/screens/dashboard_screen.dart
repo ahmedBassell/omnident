@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:omni_dent/core/services/appointments_service.dart';
 import 'package:omni_dent/core/services/patients_service.dart';
 import 'package:omni_dent/core/services/utils_service.dart';
 import 'package:omni_dent/database/database.dart';
+import 'package:omni_dent/instruments/services/instruments_service.dart';
+import 'package:omni_dent/locations/services/locations_service.dart';
 import 'package:omni_dent/patients/screens/patient_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -12,11 +15,17 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   PatientsService get _patientsService => GetIt.I<PatientsService>();
+  InstrumentsService get _instrumentsService => GetIt.I<InstrumentsService>();
+  LocationsService get _locationsService => GetIt.I<LocationsService>();
+  AppointmentsService get _appointmentsService =>
+      GetIt.I<AppointmentsService>();
   UtilsService get _utilsService => GetIt.I<UtilsService>();
-  // AppointmentsService get _appointmentsService =>
-  //     GetIt.I<AppointmentsService>();
-  // List<AppointmentWithPatient> upcomingAppointments = [];
+
   List<Patient> recentPatients = [];
+  String totalPatientsCount = "--";
+  String totalLocationsCount = "--";
+  String trackedInstrumentssCount = "--";
+  String todayAppointmentsCount = "--";
 
   @override
   void initState() {
@@ -27,6 +36,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
         recentPatients = patients;
       });
     });
+
+    _patientsService.totalCount().then(((value) {
+      setState(() {
+        totalPatientsCount = value.toString();
+      });
+    }));
+
+    _instrumentsService.totalCount().then(((value) {
+      setState(() {
+        trackedInstrumentssCount = value.toString();
+      });
+    }));
+
+    _locationsService.totalCount().then(((value) {
+      setState(() {
+        totalLocationsCount = value.toString();
+      });
+    }));
+
+    _appointmentsService.todayCount().then(((value) {
+      setState(() {
+        todayAppointmentsCount = value.toString();
+      });
+    }));
     // _appointmentsService.getAppointments().then((data) {
     //   setState(() {
     //     upcomingAppointments = data;
@@ -64,12 +97,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
           _buildInsightCard(
               icon: Icons.people,
               label: 'Total Patients',
-              value: '250', // Replace with actual patient count
+              value: totalPatientsCount, // Replace with actual patient count
               color: Colors.red.shade200),
           _buildInsightCard(
               icon: Icons.calendar_today,
               label: 'Today\'s Appointments',
-              value: '15', // Replace with actual appointment count for today
+              value:
+                  todayAppointmentsCount, // Replace with actual appointment count for today
               color: Colors.teal.shade200),
         ],
       ),
@@ -79,12 +113,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
           _buildInsightCard(
               icon: Icons.location_on,
               label: 'Locations',
-              value: '3', // Replace with actual location count
+              value: totalLocationsCount, // Replace with actual location count
               color: Colors.teal.shade200),
           _buildInsightCard(
               icon: Icons.track_changes,
               label: 'Tracked Instruments',
-              value: '50', // Replace with actual instrument count
+              value:
+                  trackedInstrumentssCount, // Replace with actual instrument count
               color: Colors.red.shade200),
         ],
       )

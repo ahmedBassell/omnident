@@ -141,6 +141,17 @@ class AppointmentsService {
 
     return findById(appointmentId);
   }
+
+  Future<int> todayCount() async {
+    var now = DateTime.now();
+    DateTime lower = DateTime(now.year, now.month, now.day);
+    DateTime higher = DateTime.now().add(Duration(days: 1));
+    var countExp = _db.appointments.id.count();
+    final query = _db.selectOnly(_db.appointments)..addColumns([countExp]);
+    query.where(_db.appointments.dateTimeFrom.isBetweenValues(lower, higher));
+    var result = await query.map((row) => row.read(countExp)).getSingle();
+    return result!;
+  }
 }
 
 class AppointmentWithPatient {

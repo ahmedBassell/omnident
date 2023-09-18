@@ -48,4 +48,11 @@ class LocationsService {
     await (_db.locations.delete()..where((tbl) => tbl.id.equals(locationId)))
         .go();
   }
+
+  Future<int> totalCount() async {
+    var countExp = _db.locations.id.count();
+    final query = _db.selectOnly(_db.locations)..addColumns([countExp]);
+    var result = await query.map((row) => row.read(countExp)).getSingle();
+    return result!;
+  }
 }

@@ -93,4 +93,11 @@ class PatientsService {
 
     return age;
   }
+
+  Future<int> totalCount() async {
+    var countExp = _db.patients.id.count();
+    final query = _db.selectOnly(_db.patients)..addColumns([countExp]);
+    var result = await query.map((row) => row.read(countExp)).getSingle();
+    return result!;
+  }
 }

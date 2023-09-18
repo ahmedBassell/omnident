@@ -54,4 +54,12 @@ class InstrumentsService {
 
     return findById(instrumentId);
   }
+
+  Future<int> totalCount() async {
+    var countExp = _db.instruments.id.count();
+    final query = _db.selectOnly(_db.instruments)..addColumns([countExp]);
+    query.where(_db.instruments.receivedAt.isNull());
+    var result = await query.map((row) => row.read(countExp)).getSingle();
+    return result!;
+  }
 }
