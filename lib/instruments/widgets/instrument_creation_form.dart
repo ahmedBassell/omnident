@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:omni_dent/core/services/images_service.dart';
 import 'package:omni_dent/database/database.dart';
 import 'package:omni_dent/instruments/services/instruments_service.dart';
 import 'package:omni_dent/locations/services/locations_service.dart';
@@ -14,6 +15,7 @@ class InstrumentCreationForm extends StatefulWidget {
 }
 
 class _InstrumentCreationFormState extends State<InstrumentCreationForm> {
+  ImagesService get _imagesService => GetIt.I<ImagesService>();
   InstrumentsService get _instrumentsService => GetIt.I<InstrumentsService>();
   LocationsService get _locationsService => GetIt.I<LocationsService>();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -21,6 +23,7 @@ class _InstrumentCreationFormState extends State<InstrumentCreationForm> {
   Location? _location = null;
   bool _isLentToFriend = false;
   String? _friendName = null;
+  String? _imagePath = null;
   List<Location> _locations = [];
 
   @override
@@ -85,8 +88,15 @@ class _InstrumentCreationFormState extends State<InstrumentCreationForm> {
                 SizedBox(width: 8.0),
                 IconButton(
                   icon: Icon(Icons.camera_alt),
-                  onPressed: () {
+                  onPressed: () async {
                     // Implement photo capture logic
+                    String? imagePath =
+                        await _imagesService.captureAndSaveImage();
+                    if (imagePath != null) {
+                      // Save the imagePath in your database (Drift DB) or use it as needed.
+                    } else {
+                      // Handle the case where image capture failed.
+                    }
                   },
                 ),
               ],
@@ -137,7 +147,7 @@ class _InstrumentCreationFormState extends State<InstrumentCreationForm> {
       Instrument newInstrument = await _instrumentsService.create(
         name: _name,
         locationId: _location!.id,
-        imagePath: null, // You can set this to the photo URL when implemented
+        imagePath: _imagePath,
         lentToFriendName: _friendName,
       );
       widget

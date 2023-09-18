@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:omni_dent/core/services/appointments_service.dart';
+import 'package:omni_dent/core/services/images_service.dart';
 import 'package:omni_dent/core/services/patients_service.dart';
 import 'package:omni_dent/core/services/snack_bar_service.dart';
 import 'package:omni_dent/core/services/utils_service.dart';
@@ -18,6 +19,7 @@ void setupLocator() {
   GetIt.I.registerLazySingleton(() => SessionsService());
   GetIt.I.registerLazySingleton(() => UtilsService());
   GetIt.I.registerLazySingleton(() => SnackBarService());
+  GetIt.I.registerLazySingleton(() => ImagesService());
   // DB
   final database = OmniDatabase();
   GetIt.I.registerLazySingleton(() => database);
