@@ -152,6 +152,7 @@ class _InstrumentItemState extends State<InstrumentItem> {
                           instrumentId: widget.instrument.id,
                           locationId: widget.instrument.location,
                           name: widget.instrument.name,
+                          imagePath: widget.instrument.imagePath,
                           receivedAt: DateTime.now());
                       _snackBarService.show(
                           context, "Instrument has been marked as received!",
@@ -178,6 +179,7 @@ class _InstrumentItemState extends State<InstrumentItem> {
         instrumentId: widget.instrument.id,
         locationId: widget.instrument.location,
         name: widget.instrument.name,
+        imagePath: widget.instrument.imagePath,
         receivedAt: null);
     widget.onInstrumentUpdated();
   }
