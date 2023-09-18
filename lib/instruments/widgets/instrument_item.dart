@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:omni_dent/core/services/snack_bar_service.dart';
@@ -55,22 +57,54 @@ class _InstrumentItemState extends State<InstrumentItem> {
                 width: 2.0, // Set the width of the left border
               ),
             ),
+            // image: widget.instrument.imagePath != null
+            //     ? DecorationImage(
+            //         image: FileImage(File(widget.instrument.imagePath!)),
+            //         fit: BoxFit.cover, // Adjust the fit as needed
+            //       )
+            //     : null,
           ),
           child: ListTile(
             horizontalTitleGap: 8.0,
             contentPadding: EdgeInsets.all(8.0),
             titleAlignment: ListTileTitleAlignment.top,
-            leading:
-                Column(mainAxisAlignment: MainAxisAlignment.start, children: [
-              CircleAvatar(
-                backgroundColor:
-                    Colors.teal.shade200, // You can use a different color
-                child: Icon(
-                  Icons.handyman, // Replace with your instrument-related icon
-                  color: Colors.white,
-                ),
-              )
-            ]),
+            leading: GestureDetector(
+                onTap: () {
+                  // Handle the tap event to open a larger preview
+                  if (widget.instrument.imagePath != null) {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        content: Image.file(File(widget.instrument.imagePath!)),
+                        // You can customize the AlertDialog further if needed
+                      ),
+                    );
+                  }
+                },
+                child: widget.instrument.imagePath != null
+                    ? CircleAvatar(
+                        backgroundColor: Colors
+                            .transparent, // You can use a different background color
+                        backgroundImage: widget.instrument.imagePath != null
+                            ? FileImage(File(widget.instrument.imagePath!))
+                            : null,
+                        radius: 25, // Adjust the radius as needed
+                      )
+                    : Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          CircleAvatar(
+                            radius: 25,
+                            backgroundColor: Colors
+                                .teal.shade200, // You can use a different color
+                            child: Icon(
+                              Icons
+                                  .handyman, // Replace with your instrument-related icon
+                              color: Colors.white,
+                            ),
+                          )
+                        ],
+                      )),
             title: Text(
               _utilsService.capitalize(widget.instrument.name),
               style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),

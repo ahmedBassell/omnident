@@ -93,6 +93,7 @@ class _InstrumentCreationFormState extends State<InstrumentCreationForm> {
                     String? imagePath =
                         await _imagesService.captureAndSaveImage();
                     if (imagePath != null) {
+                      _imagePath = imagePath;
                       // Save the imagePath in your database (Drift DB) or use it as needed.
                     } else {
                       // Handle the case where image capture failed.

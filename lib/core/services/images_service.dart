@@ -8,7 +8,7 @@ class ImagesService {
   Future<String?> captureAndSaveImage() async {
     try {
       final XFile? imageFile =
-          await _picker.pickImage(source: ImageSource.gallery);
+          await _picker.pickImage(source: ImageSource.camera);
 
       if (imageFile == null) {
         return null; // No image was captured
