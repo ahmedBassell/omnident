@@ -8,10 +8,9 @@ import 'package:omni_dent/locations/services/locations_service.dart';
 
 class InstrumentItem extends StatefulWidget {
   final Instrument instrument;
-  final Function() onInstrumentReceived;
+  final Function() onInstrumentUpdated;
 
-  InstrumentItem(
-      {required this.instrument, required this.onInstrumentReceived});
+  InstrumentItem({required this.instrument, required this.onInstrumentUpdated});
 
   @override
   _InstrumentItemState createState() => _InstrumentItemState();
@@ -121,8 +120,9 @@ class _InstrumentItemState extends State<InstrumentItem> {
                           name: widget.instrument.name,
                           receivedAt: DateTime.now());
                       _snackBarService.show(
-                          context, "Instrument has been marked as received!");
-                      widget.onInstrumentReceived();
+                          context, "Instrument has been marked as received!",
+                          actionLabel: "Undo", actionOnPress: undoReceive);
+                      widget.onInstrumentUpdated();
                     },
                     style: ElevatedButton.styleFrom(
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -137,5 +137,14 @@ class _InstrumentItemState extends State<InstrumentItem> {
             ),
           ),
         ));
+  }
+
+  void undoReceive() async {
+    await _instrumentsService.update(
+        instrumentId: widget.instrument.id,
+        locationId: widget.instrument.location,
+        name: widget.instrument.name,
+        receivedAt: null);
+    widget.onInstrumentUpdated();
   }
 }

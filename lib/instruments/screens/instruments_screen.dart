@@ -50,7 +50,7 @@ class _InstrumentsScreenState extends State<InstrumentsScreen> {
               itemBuilder: (context, index) {
                 return InstrumentItem(
                     instrument: instruments[index],
-                    onInstrumentReceived: onInstrumentReceived);
+                    onInstrumentUpdated: onInstrumentUpdated);
               },
             ),
     );
@@ -78,7 +78,7 @@ class _InstrumentsScreenState extends State<InstrumentsScreen> {
     );
   }
 
-  void onInstrumentReceived() async {
+  void onInstrumentUpdated() async {
     _instrumentsService.getAll().then((value) => {
           setState(() {
             instruments = value;
