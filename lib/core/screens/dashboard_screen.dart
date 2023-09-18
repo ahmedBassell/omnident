@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import 'package:omni_dent/core/services/patients_service.dart';
+import 'package:omni_dent/core/services/utils_service.dart';
+import 'package:omni_dent/database/database.dart';
 import 'package:omni_dent/patients/screens/patient_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -7,21 +11,22 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  // PatientsService get _patientsService => GetIt.I<PatientsService>();
+  PatientsService get _patientsService => GetIt.I<PatientsService>();
+  UtilsService get _utilsService => GetIt.I<UtilsService>();
   // AppointmentsService get _appointmentsService =>
   //     GetIt.I<AppointmentsService>();
   // List<AppointmentWithPatient> upcomingAppointments = [];
-  // List<Patient> recentPatients = [];
+  List<Patient> recentPatients = [];
 
   @override
   void initState() {
     super.initState();
     // List<Patient> patients = [];
-    // _patientsService.getPatients().then((patients) {
-    //   setState(() {
-    //     recentPatients = patients;
-    //   });
-    // });
+    _patientsService.getRecentPatients().then((patients) {
+      setState(() {
+        recentPatients = patients;
+      });
+    });
     // _appointmentsService.getAppointments().then((data) {
     //   setState(() {
     //     upcomingAppointments = data;
@@ -128,29 +133,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         SizedBox(height: 16),
-        // Replace the following list with your actual list of recent patients
-        _buildPatientListItem(
-            'John Doe', '30 years', 'Male', Colors.teal.shade200),
-        _buildPatientListItem(
-            'Jane Smith', '25 years', 'Female', Colors.red.shade200),
-        _buildPatientListItem(
-            'Alice Johnson', '45 years', 'Female', Colors.teal.shade200),
-        _buildPatientListItem(
-            'Bob Brown', '38 years', 'Male', Colors.red.shade200),
-        _buildPatientListItem(
-            'Eva White', '29 years', 'Female', Colors.teal.shade200),
+        for (int i = 0; i < recentPatients.length; i++)
+          _buildPatientListItem(
+              recentPatients[i],
+              recentPatients[i].name,
+              _patientsService.calculateAge(recentPatients[i]).toString(),
+              _utilsService.capitalize(recentPatients[i].gender.name),
+              i % 2 == 0 ? Colors.teal.shade200 : Colors.red.shade200),
       ],
     );
   }
 
   Widget _buildPatientListItem(
-      String name, String age, String gender, Color bgColor) {
+      Patient _patient, String name, String age, String gender, Color bgColor) {
     return Card(
       elevation: 2,
       margin: EdgeInsets.only(bottom: 16),
       child: ListTile(
         title: Text(name),
-        subtitle: Text('$age · $gender'),
+        subtitle: Text('$age years · $gender'),
         leading: CircleAvatar(
           backgroundColor: bgColor,
           foregroundColor: Colors.white,
@@ -159,10 +160,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
         // Add onTap functionality to navigate to patient details if needed
         onTap: () {
           // Navigate to patient details page
-          // Navigator.push(
-          //     context,
-          //     MaterialPageRoute(
-          //         builder: (context) => PatientScreen(patient: _patient)));
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => PatientScreen(patient: _patient)));
         },
       ),
     );

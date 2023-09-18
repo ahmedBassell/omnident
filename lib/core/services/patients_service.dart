@@ -36,6 +36,23 @@ class PatientsService {
     return patients;
   }
 
+  Future<List<Patient>> getRecentPatients(
+      {int limit = 50, int offset = 0}) async {
+    DateTime lower = DateTime.now().add(Duration(days: -1));
+    DateTime higher = DateTime.now().add(Duration(days: 1));
+
+    final query = _db.select(_db.patients, distinct: true).join([
+      leftOuterJoin(
+          _db.appointments, _db.appointments.patient.equalsExp(_db.patients.id),
+          useColumns: false),
+    ])
+      ..where(_db.appointments.dateTimeFrom.isBetweenValues(lower, higher));
+    query.orderBy([OrderingTerm.asc(_db.appointments.dateTimeFrom)]);
+    query.limit(limit, offset: offset);
+
+    return query.map((row) => row.readTable(_db.patients)).get();
+  }
+
   // Update
   Future<Patient> update(
       {required int patientId,
@@ -48,9 +65,6 @@ class PatientsService {
     await (_db.patients.update()..where((tbl) => tbl.id.equals(patientId)))
         .write(PatientsCompanion(
             name: Value(name),
-
-            // phone: Value(phone),
-            // email: Value(email),
             gender: Value(gender),
             birthDate: (birthDate == null
                 ? Value(_defaultBirthDate)
