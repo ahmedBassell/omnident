@@ -35,13 +35,13 @@ class OmniDatabase extends _$OmniDatabase {
         if (details.wasCreated) {
           // Create a bunch of default values so the app doesn't look too empty
           // on the first start.
-          await into(patients).insert(Patient(
-              id: 1,
-              createdAt: DateTime.now(),
-              updatedAt: DateTime.now(),
-              name: "Ahmed Bassell",
-              gender: Gender.male,
-              birthDate: DateTime(1993)));
+          // await into(patients).insert(Patient(
+          //     id: 1,
+          //     createdAt: DateTime.now(),
+          //     updatedAt: DateTime.now(),
+          //     name: "Ahmed Bassell",
+          //     gender: Gender.male,
+          //     birthDate: DateTime(1993)));
         }
 
         if (kDebugMode) {

@@ -9,8 +9,9 @@ import 'package:omni_dent/patients/screens/patient_screen.dart';
 class PatientItem extends StatelessWidget {
   PatientsService get _patientsService => GetIt.I<PatientsService>();
   final Patient patient;
+  final Function onPatientDelete;
 
-  PatientItem({required this.patient});
+  PatientItem({required this.patient, required this.onPatientDelete});
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +77,7 @@ class PatientItem extends StatelessWidget {
                   child: Text('Delete'),
                 ),
               ],
-              onSelected: (value) {
+              onSelected: (value) async {
                 if (value == 'update') {
                   showModalBottomSheet(
                     context: context,
@@ -87,6 +88,7 @@ class PatientItem extends StatelessWidget {
                     // Navigator.pop(context);
                   });
                 } else if (value == 'delete') {
+                  await onPatientDelete(patientId: patient.id);
                   // Handle delete action
                 }
               },

@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:omni_dent/core/services/appointments_service.dart';
 import 'package:omni_dent/core/services/patients_service.dart';
 import 'package:omni_dent/core/services/utils_service.dart';
+import 'package:omni_dent/core/widgets/patient_creation_form.dart';
 import 'package:omni_dent/database/database.dart';
 import 'package:omni_dent/instruments/services/instruments_service.dart';
 import 'package:omni_dent/locations/services/locations_service.dart';
@@ -22,6 +25,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   UtilsService get _utilsService => GetIt.I<UtilsService>();
 
   List<Patient> recentPatients = [];
+  late StreamSubscription<List<Patient>> _recentPatientsSubscription;
   String totalPatientsCount = "--";
   String totalLocationsCount = "--";
   String trackedInstrumentssCount = "--";
@@ -30,10 +34,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    // List<Patient> patients = [];
-    _patientsService.getRecentPatients().then((patients) {
+
+    _recentPatientsSubscription =
+        _patientsService.watchRecentPatients().listen((data) {
       setState(() {
-        recentPatients = patients;
+        recentPatients = data;
       });
     });
 
@@ -65,6 +70,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
     //     upcomingAppointments = data;
     //   });
     // });
+  }
+
+  @override
+  void dispose() {
+    _recentPatientsSubscription.cancel();
+    super.dispose();
   }
 
   @override
@@ -160,6 +171,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildRecentPatientsList() {
+    if (recentPatients.isEmpty) {
+      // Handle the case when there are no recent patients
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+              child: Text(
+            'No Recent Patients',
+            style: TextStyle(fontSize: 16, color: Colors.grey),
+          )),
+          SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                builder: (BuildContext context) {
+                  return PatientCreationForm();
+                },
+              ).whenComplete(() {
+                // Navigator.pop(context);
+              });
+            },
+            child: Text('Add a Patient'),
+          ),
+        ],
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -170,11 +209,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
         SizedBox(height: 16),
         for (int i = 0; i < recentPatients.length; i++)
           _buildPatientListItem(
-              recentPatients[i],
-              recentPatients[i].name,
-              _patientsService.calculateAge(recentPatients[i]).toString(),
-              _utilsService.capitalize(recentPatients[i].gender.name),
-              i % 2 == 0 ? Colors.teal.shade200 : Colors.red.shade200),
+            recentPatients[i],
+            recentPatients[i].name,
+            _patientsService.calculateAge(recentPatients[i]).toString(),
+            _utilsService.capitalize(recentPatients[i].gender.name),
+            i % 2 == 0 ? Colors.teal.shade200 : Colors.red.shade200,
+          ),
       ],
     );
   }

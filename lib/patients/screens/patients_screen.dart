@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:omni_dent/core/services/patients_service.dart';
-import 'package:omni_dent/core/widgets/patient_avatar.dart';
-import 'package:omni_dent/core/widgets/patient_creation_form.dart';
+import 'package:omni_dent/core/services/snack_bar_service.dart';
 import 'package:omni_dent/database/database.dart';
 import 'package:omni_dent/patients/widgets/patient_item.dart';
 
@@ -15,6 +14,7 @@ class PatientsScreen extends StatefulWidget {
 
 class _PatientsScreenState extends State<PatientsScreen> {
   PatientsService get _patientsService => GetIt.I<PatientsService>();
+  SnackBarService get _snackBarService => GetIt.I<SnackBarService>();
   List<Patient> patients = [];
 
   List<Patient> filteredPatients = [];
@@ -29,6 +29,14 @@ class _PatientsScreenState extends State<PatientsScreen> {
       });
     });
     super.initState();
+  }
+
+  void refreshPatients() {
+    _patientsService.getPatients(limit: 10, offset: 0).then((patientsRecords) {
+      setState(() {
+        filteredPatients = patientsRecords;
+      });
+    });
   }
 
   void _filterPatients(String query) {
@@ -64,12 +72,20 @@ class _PatientsScreenState extends State<PatientsScreen> {
             child: ListView.builder(
               itemCount: filteredPatients.length,
               itemBuilder: (context, index) {
-                return PatientItem(patient: filteredPatients[index]);
+                return PatientItem(
+                    patient: filteredPatients[index],
+                    onPatientDelete: deletePatient);
               },
             ),
           ),
         ],
       ),
     );
+  }
+
+  void deletePatient({required int patientId}) async {
+    await _patientsService.delete(patientId: patientId);
+    _snackBarService.show(context, "Patient deleted successfuly!");
+    refreshPatients();
   }
 }

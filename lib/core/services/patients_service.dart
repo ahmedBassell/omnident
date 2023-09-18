@@ -46,11 +46,31 @@ class PatientsService {
           _db.appointments, _db.appointments.patient.equalsExp(_db.patients.id),
           useColumns: false),
     ])
-      ..where(_db.appointments.dateTimeFrom.isBetweenValues(lower, higher));
+      ..where(_db.appointments.dateTimeFrom.isBetweenValues(lower, higher) |
+          _db.appointments.dateTimeFrom.isNull());
     query.orderBy([OrderingTerm.asc(_db.appointments.dateTimeFrom)]);
     query.limit(limit, offset: offset);
 
     return query.map((row) => row.readTable(_db.patients)).get();
+  }
+
+  Stream<List<Patient>> watchRecentPatients({int limit = 50, int offset = 0}) {
+    DateTime lower = DateTime.now().add(Duration(days: -1));
+    DateTime higher = DateTime.now().add(Duration(days: 1));
+
+    final query = _db.select(_db.patients, distinct: true).join([
+      leftOuterJoin(
+          _db.appointments, _db.appointments.patient.equalsExp(_db.patients.id),
+          useColumns: false),
+    ])
+      ..where(_db.appointments.dateTimeFrom.isBetweenValues(lower, higher) |
+          _db.appointments.dateTimeFrom.isNull());
+    query.orderBy([OrderingTerm.asc(_db.appointments.dateTimeFrom)]);
+    query.limit(limit, offset: offset);
+
+    return query.watch().map((rows) {
+      return rows.map((row) => row.readTable(_db.patients)).toList();
+    });
   }
 
   // Update
@@ -77,6 +97,7 @@ class PatientsService {
   Future<void> delete({
     required int patientId,
   }) async {
+    print(patientId);
     await (_db.patients.delete()..where((tbl) => tbl.id.equals(patientId)))
         .go();
   }
