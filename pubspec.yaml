@@ -36,6 +36,8 @@ dependencies:
   path_provider: ^2.0.0 # Drift dependency
   path: ^1.8.3 # Drift dependency
   image_picker: ^1.0.4 # image picking from camera
+  dotted_border: ^2.0.0+3
+
   flutter:
     sdk: flutter
 

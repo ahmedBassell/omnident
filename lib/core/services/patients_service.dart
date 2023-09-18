@@ -97,9 +97,15 @@ class PatientsService {
   Future<void> delete({
     required int patientId,
   }) async {
-    print(patientId);
-    await (_db.patients.delete()..where((tbl) => tbl.id.equals(patientId)))
-        .go();
+    await _db.transaction(() async {
+      await (_db.appointments.delete()
+            ..where((tbl) => tbl.patient.equals(patientId)))
+          .go();
+      await (_db.patients.delete()..where((tbl) => tbl.id.equals(patientId)))
+          .go();
+    }).onError((error, stackTrace) {
+      print(error.toString());
+    });
   }
 
   int calculateAge(Patient p) {

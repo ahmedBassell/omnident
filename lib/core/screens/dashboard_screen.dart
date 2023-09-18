@@ -5,10 +5,14 @@ import 'package:get_it/get_it.dart';
 import 'package:omni_dent/core/services/appointments_service.dart';
 import 'package:omni_dent/core/services/patients_service.dart';
 import 'package:omni_dent/core/services/utils_service.dart';
+import 'package:omni_dent/core/widgets/appointment_creation_form.dart';
+import 'package:omni_dent/core/widgets/empty_insight_card.dart';
 import 'package:omni_dent/core/widgets/patient_creation_form.dart';
 import 'package:omni_dent/database/database.dart';
 import 'package:omni_dent/instruments/services/instruments_service.dart';
+import 'package:omni_dent/instruments/widgets/instrument_creation_form.dart';
 import 'package:omni_dent/locations/services/locations_service.dart';
+import 'package:omni_dent/locations/widgets/location_creation_form.dart';
 import 'package:omni_dent/patients/screens/patient_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -26,10 +30,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   List<Patient> recentPatients = [];
   late StreamSubscription<List<Patient>> _recentPatientsSubscription;
-  String totalPatientsCount = "--";
-  String totalLocationsCount = "--";
-  String trackedInstrumentssCount = "--";
-  String todayAppointmentsCount = "--";
+  String totalPatientsCount = "0";
+  String totalLocationsCount = "0";
+  String trackedInstrumentssCount = "0";
+  String todayAppointmentsCount = "0";
 
   @override
   void initState() {
@@ -42,34 +46,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
       });
     });
 
-    _patientsService.totalCount().then(((value) {
-      setState(() {
-        totalPatientsCount = value.toString();
-      });
-    }));
+    _refreshPatientsCount();
 
-    _instrumentsService.totalCount().then(((value) {
-      setState(() {
-        trackedInstrumentssCount = value.toString();
-      });
-    }));
+    _refreshInstrumentsCount();
 
-    _locationsService.totalCount().then(((value) {
-      setState(() {
-        totalLocationsCount = value.toString();
-      });
-    }));
+    _refreshLocationsCount();
 
-    _appointmentsService.todayCount().then(((value) {
-      setState(() {
-        todayAppointmentsCount = value.toString();
-      });
-    }));
-    // _appointmentsService.getAppointments().then((data) {
-    //   setState(() {
-    //     upcomingAppointments = data;
-    //   });
-    // });
+    _refreshAppointmentsCount();
   }
 
   @override
@@ -106,16 +89,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           _buildInsightCard(
-              icon: Icons.people,
-              label: 'Total Patients',
-              value: totalPatientsCount, // Replace with actual patient count
-              color: Colors.red.shade200),
+            icon: Icons.people,
+            label: 'Total Patients',
+            value: totalPatientsCount, // Replace with actual patient count
+            color: Colors.red.shade200,
+            emptyStateMessage: "Add a Patient",
+            onCardTap: () {
+              _showPatientSheet();
+            },
+          ),
           _buildInsightCard(
               icon: Icons.calendar_today,
               label: 'Today\'s Appointments',
               value:
                   todayAppointmentsCount, // Replace with actual appointment count for today
-              color: Colors.teal.shade200),
+              color: Colors.teal.shade200,
+              emptyStateMessage: "Add an Appointment",
+              onCardTap: () {
+                _openAppointmentForm();
+              }),
         ],
       ),
       Row(
@@ -124,50 +116,83 @@ class _DashboardScreenState extends State<DashboardScreen> {
           _buildInsightCard(
               icon: Icons.location_on,
               label: 'Locations',
-              value: totalLocationsCount, // Replace with actual location count
-              color: Colors.teal.shade200),
+              value: totalLocationsCount,
+              color: Colors.teal.shade200,
+              emptyStateMessage: "Add a Location",
+              onCardTap: () {
+                _openLocationForm();
+              }),
           _buildInsightCard(
               icon: Icons.track_changes,
               label: 'Tracked Instruments',
               value:
                   trackedInstrumentssCount, // Replace with actual instrument count
-              color: Colors.red.shade200),
+              color: Colors.red.shade200,
+              emptyStateMessage: "Track Instrument",
+              onCardTap: (() {
+                _showAddInstrumentSheet();
+              })),
         ],
       )
     ]);
   }
 
-  Widget _buildInsightCard(
-      {required IconData icon,
-      required String label,
-      required String value,
-      required Color color}) {
+  Widget _buildInsightCard({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+    String emptyStateMessage = 'Add', // Message for the empty state
+    VoidCallback? onCardTap, // Callback for when the card is tapped
+  }) {
+    if (value == '0' && onCardTap != null) {
+      return EmptyInsightCard(
+        icon: icon,
+        color: color,
+        label: label,
+        emptyMessage: emptyStateMessage,
+        onCardTap: () {
+          onCardTap();
+        },
+      );
+    }
+
     return Expanded(
+      child: GestureDetector(
+        onTap:
+            onCardTap, // Trigger the card tap callback when the card is tapped
         child: Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Icon(
-              icon,
-              size: 32,
-              color: color,
+          elevation: 2,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                Column(
+                  children: [
+                    Icon(
+                      icon,
+                      size: 32,
+                      color: color,
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      label,
+                      style:
+                          TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 8),
+                Text(
+                  value,
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
-            SizedBox(height: 8),
-            Text(
-              label,
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 4),
-            Text(
-              value,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-          ],
+          ),
         ),
       ),
-    ));
+    );
   }
 
   Widget _buildRecentPatientsList() {
@@ -178,20 +203,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: [
           Center(
               child: Text(
-            'No Recent Patients',
+            'Patients are as rare as doctors on vacation! 🏖️ \nAdd a patient to liven things up! 😁',
+            textAlign: TextAlign.center,
             style: TextStyle(fontSize: 16, color: Colors.grey),
           )),
           SizedBox(height: 16),
           ElevatedButton(
             onPressed: () {
-              showModalBottomSheet(
-                context: context,
-                builder: (BuildContext context) {
-                  return PatientCreationForm();
-                },
-              ).whenComplete(() {
-                // Navigator.pop(context);
-              });
+              _showPatientSheet();
             },
             child: Text('Add a Patient'),
           ),
@@ -242,5 +261,103 @@ class _DashboardScreenState extends State<DashboardScreen> {
         },
       ),
     );
+  }
+
+  Future<void> _openLocationForm() {
+    return showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(
+                8.0, 8.0, 8.0, MediaQuery.of(context).viewInsets.bottom),
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[LocationCreationForm()]));
+      },
+    ).whenComplete(() {
+      _refreshLocationsCount();
+    });
+  }
+
+  Future<void> _openAppointmentForm() {
+    return showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(
+                8.0, 8.0, 8.0, MediaQuery.of(context).viewInsets.bottom),
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[AppointmentCreationForm()]));
+      },
+    ).whenComplete(() {
+      _refreshAppointmentsCount();
+    });
+  }
+
+  void _showAddInstrumentSheet() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return SingleChildScrollView(
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+              InstrumentCreationForm(
+                onInstrumentCreated: (newInstrument) {
+                  Navigator.pop(context);
+                },
+              )
+            ]));
+      },
+    ).whenComplete(() {
+      _refreshInstrumentsCount();
+    });
+  }
+
+  void _showPatientSheet() {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return PatientCreationForm();
+      },
+    ).whenComplete(() {
+      _refreshPatientsCount();
+    });
+  }
+
+  void _refreshPatientsCount() {
+    _patientsService.totalCount().then(((value) {
+      setState(() {
+        totalPatientsCount = value.toString();
+      });
+    }));
+  }
+
+  void _refreshInstrumentsCount() {
+    _instrumentsService.totalCount().then(((value) {
+      setState(() {
+        trackedInstrumentssCount = value.toString();
+      });
+    }));
+  }
+
+  void _refreshLocationsCount() {
+    _locationsService.totalCount().then(((value) {
+      setState(() {
+        totalLocationsCount = value.toString();
+      });
+    }));
+  }
+
+  void _refreshAppointmentsCount() {
+    _appointmentsService.todayCount().then(((value) {
+      setState(() {
+        todayAppointmentsCount = value.toString();
+      });
+    }));
   }
 }
