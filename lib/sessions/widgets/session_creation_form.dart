@@ -22,6 +22,7 @@ class SessionCreationForm extends StatefulWidget {
 }
 
 class _SessionCreationFormState extends State<SessionCreationForm> {
+  final _formKey = GlobalKey<FormState>();
   SessionsService get _sessionsService => GetIt.I<SessionsService>();
   DateTime _sessionDate = DateTime.now();
   String _symptoms = '';
@@ -52,8 +53,6 @@ class _SessionCreationFormState extends State<SessionCreationForm> {
 
   @override
   Widget build(BuildContext context) {
-    final _formKey = GlobalKey<FormState>();
-
     return SingleChildScrollView(
       child: Padding(
         padding: EdgeInsets.all(16),

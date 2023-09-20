@@ -35,11 +35,13 @@ class SessionItem extends StatelessWidget {
   final SessionWithTeeth sessionWithTeeth;
   final Patient patient;
   final Function onSessionDelete;
+  Function showUpdateSessionSheet;
 
   SessionItem(
       {required this.sessionWithTeeth,
       required this.patient,
-      required this.onSessionDelete});
+      required this.onSessionDelete,
+      required this.showUpdateSessionSheet});
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +76,7 @@ class SessionItem extends StatelessWidget {
                           size: 20), // Icon for update
                       onPressed: () {
                         // Handle update button press here
-                        _showUpdateSessionSheet(context);
+                        showUpdateSessionSheet(patient, sessionWithTeeth);
                       },
                     ),
                     IconButton(
@@ -178,29 +180,6 @@ class SessionItem extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  void _showUpdateSessionSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              SessionCreationForm(
-                patient: patient,
-                existingSession: sessionWithTeeth,
-              ),
-            ],
-          ),
-        );
-      },
-    ).then((_) {
-      // Refresh sessions when the bottom sheet is closed (e.g., after adding a session).
-      // _loadSessions();
-    });
   }
 
   String _formatToothState(ToothState state) {

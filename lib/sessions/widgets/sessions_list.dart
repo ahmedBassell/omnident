@@ -30,7 +30,6 @@ class _SessionsListState extends State<SessionsList> {
         await _sessionsService.getSessions(patientId: widget.patient.id);
     final loadedSessionsWithteeth = await _sessionsService.getSessionsWithTeeth(
         patientId: widget.patient.id);
-    print(loadedSessionsWithteeth);
     setState(() {
       sessions = loadedSessions;
       sessionsWithTeeth = loadedSessionsWithteeth;
@@ -46,7 +45,8 @@ class _SessionsListState extends State<SessionsList> {
           return SessionItem(
               sessionWithTeeth: sessionsWithTeeth[index],
               patient: widget.patient,
-              onSessionDelete: _onSessionDelete);
+              onSessionDelete: _onSessionDelete,
+              showUpdateSessionSheet: _showUpdateSessionSheet);
         },
       ),
       floatingActionButton: FloatingActionButton(
@@ -63,12 +63,38 @@ class _SessionsListState extends State<SessionsList> {
       context: context,
       builder: (context) {
         return SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(
+              8.0, 8.0, 8.0, MediaQuery.of(context).viewInsets.bottom),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               SessionCreationForm(
                 patient: widget.patient,
+              ),
+            ],
+          ),
+        );
+      },
+    ).then((_) {
+      // Refresh sessions when the bottom sheet is closed (e.g., after adding a session).
+      _loadSessions();
+    });
+  }
+
+  void _showUpdateSessionSheet(
+      Patient patient, SessionWithTeeth sessionWithTeeth) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              SessionCreationForm(
+                patient: patient,
+                existingSession: sessionWithTeeth,
               ),
             ],
           ),

@@ -102,8 +102,8 @@ class SessionsService {
       required List<ToothEntry> sessionTeeth}) async {
     await _db.transaction(() async {
       // insert new session
-      sessionId = await (_db.sessions.update()
-            ..where((tbl) => tbl.id.equals(sessionId)))
+      print(sessionTeeth);
+      await (_db.sessions.update()..where((tbl) => tbl.id.equals(sessionId)))
           .write(SessionsCompanion(
               patient: Value(patient.id),
               title: Value(title),
@@ -111,9 +111,12 @@ class SessionsService {
               symptoms: Value(symptoms),
               dateTimeFrom: Value(dateTimeFrom)));
       // insert session teeth in batch
+      await (_db.sessionTeeth.delete()
+            ..where((tbl) => tbl.session.equals(sessionId)))
+          .go();
+      print(sessionId);
       await _db.batch((batch) {
-        batch.insertAllOnConflictUpdate(_db.sessionTeeth,
-            sessionTeeth.map((rowEntry) {
+        batch.insertAll(_db.sessionTeeth, sessionTeeth.map((rowEntry) {
           return SessionTeethCompanion.insert(
             patient: patient.id,
             session: sessionId,

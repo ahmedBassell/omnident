@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:omni_dent/core/services/empty_states_service.dart';
 import 'package:omni_dent/database/database.dart';
 import 'package:omni_dent/instruments/services/instruments_service.dart';
 import 'package:omni_dent/instruments/widgets/instrument_creation_form.dart';
@@ -12,24 +13,18 @@ class InstrumentsScreen extends StatefulWidget {
 
 class _InstrumentsScreenState extends State<InstrumentsScreen> {
   InstrumentsService get _instrumentsService => GetIt.I<InstrumentsService>();
+  EmptyStatesService get _emptyStatesService => GetIt.I<EmptyStatesService>();
   List<Instrument> instruments = [];
   String _emptyStateCopy = "";
-  List<String> emptyStateSentences = [
-    "High-five! All instruments are settled up! 🙌",
-    "No lent or misplaced instruments in sight! 🥳",
-    "Your instrument inventory is shining bright ✨",
-    "Nice work! Your instrument inventory is on point 🪥",
-    "All tools are in place ... for now 😉"
-  ];
 
   @override
   void initState() {
     super.initState();
-    emptyStateSentences.shuffle();
     _instrumentsService.getAll().then((value) => {
           setState(() {
             instruments = value;
-            _emptyStateCopy = emptyStateSentences.first;
+            _emptyStateCopy =
+                _emptyStatesService.generateInstrumentsEmptyState();
           })
         });
   }

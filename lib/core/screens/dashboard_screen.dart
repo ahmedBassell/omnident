@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:omni_dent/core/services/appointments_service.dart';
+import 'package:omni_dent/core/services/empty_states_service.dart';
 import 'package:omni_dent/core/services/patients_service.dart';
 import 'package:omni_dent/core/services/utils_service.dart';
 import 'package:omni_dent/core/widgets/appointment_creation_form.dart';
@@ -27,6 +28,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   AppointmentsService get _appointmentsService =>
       GetIt.I<AppointmentsService>();
   UtilsService get _utilsService => GetIt.I<UtilsService>();
+  EmptyStatesService get _emptyStatesService => GetIt.I<EmptyStatesService>();
 
   List<Patient> recentPatients = [];
   late StreamSubscription<List<Patient>> _recentPatientsSubscription;
@@ -34,6 +36,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   String totalLocationsCount = "0";
   String trackedInstrumentssCount = "0";
   String todayAppointmentsCount = "0";
+  String _emptyStateCopy = "";
 
   @override
   void initState() {
@@ -53,6 +56,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _refreshLocationsCount();
 
     _refreshAppointmentsCount();
+
+    _emptyStateCopy = _emptyStatesService.generatePatientsEmptyState();
   }
 
   @override
@@ -203,7 +208,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: [
           Center(
               child: Text(
-            'Patients are as rare as doctors on vacation! 🏖️ \nAdd a patient to liven things up! 😁',
+            _emptyStateCopy,
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 16, color: Colors.grey),
           )),
