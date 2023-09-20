@@ -102,6 +102,15 @@ class PatientsService {
       await (_db.appointments.delete()
             ..where((tbl) => tbl.patient.equals(patientId)))
           .go();
+      await (_db.sessionTeeth.delete()
+            ..where((tbl) => tbl.patient.equals(patientId)))
+          .go();
+      await (_db.sessionAttachments.delete()
+            ..where((tbl) => tbl.patient.equals(patientId)))
+          .go();
+      await (_db.sessions.delete()
+            ..where((tbl) => tbl.patient.equals(patientId)))
+          .go();
       await (_db.patients.delete()..where((tbl) => tbl.id.equals(patientId)))
           .go();
     }).onError((error, stackTrace) {
