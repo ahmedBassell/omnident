@@ -85,6 +85,7 @@ class PatientsService {
     await (_db.patients.update()..where((tbl) => tbl.id.equals(patientId)))
         .write(PatientsCompanion(
             name: Value(name),
+            email: Value(email),
             gender: Value(gender),
             birthDate: (birthDate == null
                 ? Value(_defaultBirthDate)
@@ -126,5 +127,15 @@ class PatientsService {
     final query = _db.selectOnly(_db.patients)..addColumns([countExp]);
     var result = await query.map((row) => row.read(countExp)).getSingle();
     return result!;
+  }
+
+  Future<List<Patient>> searchByQuery(
+      {required String query, int limit = 50, int offset = 0}) async {
+    print(query);
+    List<Patient> patients = await (_db.select(_db.patients)
+          ..where((tbl) => tbl.name.contains(query) | tbl.email.contains(query))
+          ..limit(limit, offset: offset))
+        .get();
+    return patients;
   }
 }

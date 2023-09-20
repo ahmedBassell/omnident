@@ -151,6 +151,7 @@ class _PatientCreationFormState extends State<PatientCreationForm> {
                       );
                     } else {
                       // Update the existing patient
+                      print(_email);
                       _patientsService.update(
                         patientId: widget.existingPatient!.id,
                         name: _name!,

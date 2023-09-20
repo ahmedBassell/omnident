@@ -45,13 +45,11 @@ class _PatientsScreenState extends State<PatientsScreen> {
   }
 
   void _filterPatients(String query) {
+    final lowerCaseQuery = query.toLowerCase();
     setState(() {
-      filteredPatients = patients.where((patient) {
-        final lowerCaseQuery = query.toLowerCase();
-        final String name = patient.name.toLowerCase();
-        final String phone = patient.phone ?? "";
-        return name.contains(lowerCaseQuery) || phone.contains(lowerCaseQuery);
-      }).toList();
+      _patientsService.searchByQuery(query: lowerCaseQuery).then((value) {
+        filteredPatients = value;
+      });
     });
   }
 
