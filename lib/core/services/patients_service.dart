@@ -131,11 +131,14 @@ class PatientsService {
 
   Future<List<Patient>> searchByQuery(
       {required String query, int limit = 50, int offset = 0}) async {
-    print(query);
-    List<Patient> patients = await (_db.select(_db.patients)
-          ..where((tbl) => tbl.name.contains(query) | tbl.email.contains(query))
-          ..limit(limit, offset: offset))
-        .get();
-    return patients;
+    final sqlQuery = await (_db.select(_db.patients).join([
+      innerJoin(
+          _db.sessionTeeth, _db.sessionTeeth.patient.equalsExp(_db.patients.id))
+    ])
+      ..where(_db.patients.name.contains(query) |
+          _db.patients.email.contains(query) |
+          _db.sessionTeeth.toothName.contains(query))
+      ..limit(limit, offset: offset));
+    return sqlQuery.map((row) => row.readTable(_db.patients)).get();
   }
 }

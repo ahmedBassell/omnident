@@ -66,7 +66,7 @@ class _PatientsScreenState extends State<PatientsScreen> {
             child: TextField(
               onChanged: _filterPatients,
               decoration: InputDecoration(
-                labelText: 'Search by name or phone',
+                labelText: 'Search by name, email, or tooth name',
                 prefixIcon: Icon(Icons.search),
               ),
             ),
